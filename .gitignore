@@ -1,0 +1,19 @@
+# Environment
+.env
+
+# Python (backend)
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Node (frontend) — already covered by frontend/.gitignore but harmless to add
+node_modules/
+.next/
+out/
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
