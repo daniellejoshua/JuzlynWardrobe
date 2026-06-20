@@ -1,65 +1,227 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="relative min-h-screen bg-background text-foreground overflow-y-auto">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse at 20% 30%, rgba(184, 134, 11, 0.2) 0%, transparent 40%),
+              radial-gradient(ellipse at 80% 70%, rgba(184, 134, 11, 0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 50%, rgba(100, 150, 200, 0.1) 0%, transparent 60%),
+              linear-gradient(180deg, #0a0a0a 0%, #0f0f0f 100%)
+            `,
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+      </div>
+
+      {/* Blur overlay */}
+      <div className="absolute inset-0 backdrop-blur-3xl" />
+
+      {/* Navigation */}
+      <nav className="relative z-10 flex items-center justify-between px-8 py-6 md:px-16">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-2xl font-serif font-bold tracking-tight text-white"
+        >
+          Your Wardrobe
+        </motion.h1>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex items-center gap-8"
+        >
+          <Link
+            href="/wardrobe"
+            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
+          >
+            Style Consultant
+          </Link>
+          <Link
+            href="/gallery"
+            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
+          >
+            Favorites
+          </Link>
+          <Link
+            href="/upload"
+            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
+          >
+            Upload
+          </Link>
+          <a
+            href="#"
+            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
+          >
+            Contact
+          </a>
+        </motion.div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 px-8 py-20 md:px-16 md:py-32 lg:py-40 flex items-center min-h-[70vh]">
+        <div className="max-w-4xl">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold leading-tight mb-8 text-balance text-white"
+          >
+            Lyn's Wardrobe
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-base md:text-lg text-white/60 max-w-2xl mb-12 leading-relaxed"
+          >
+            A personalized digital Wardrobe of Juzlyn
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="flex flex-col sm:flex-row gap-6"
+          >
+            <Link href="/wardrobe">
+              <Button
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-background font-medium px-8"
+              >
+                Start Styling
+              </Button>
+            </Link>
+            <Link href="/gallery">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10 backdrop-blur px-8"
+              >
+                View Favorites
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="relative z-10 px-8 md:px-16 py-20 md:py-32">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl"
+        >
+          {[
+            {
+              title: "AI-Powered Suggestions",
+              description:
+                "Get intelligent outfit combinations using advanced AI analysis",
+              icon: "🤖",
+            },
+            {
+              title: "Smart Matching",
+              description:
+                "Find perfect pairs based on color, style, and occasion compatibility",
+              icon: "✨",
+            },
+            {
+              title: "Save Favorites",
+              description:
+                "Curate and organize your favorite outfit combinations",
+              icon: "♡",
+            },
+          ].map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.6 }}
+              viewport={{ once: true }}
+              className="group rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-8 hover:border-white/20 hover:bg-white/10 transition-all duration-300"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              <div className="mb-4 w-12 h-12 rounded-full border border-accent/50 flex items-center justify-center text-accent group-hover:border-accent">
+                {feature.icon}
+              </div>
+              <h3 className="text-xl font-serif font-bold mb-3 text-white">
+                {feature.title}
+              </h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative z-10 px-8 md:px-16 py-20 md:py-32">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="max-w-3xl mx-auto text-center"
+        >
+          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-12 md:p-16">
+            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-white text-balance">
+              Let Juzlyn Style Your Wardrobe
+            </h2>
+            <p className="text-white/60 mb-8 text-base md:text-lg leading-relaxed">
+              Unlock perfectly matched outfit combinations. Juzlyn analyzes your
+              style and creates personalized suggestions for every occasion.
+            </p>
+            <Link href="/wardrobe">
+              <Button
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-background font-medium px-8"
+              >
+                Get Started
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/10 px-8 md:px-16 py-12 md:py-16 text-white/40 text-sm">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="max-w-6xl flex flex-col md:flex-row justify-between items-center gap-8"
+        >
+          <p>
+            &copy; 2026 Your Wardrobe with Juzlyn. AI Fashion Styling Assistant.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          <div className="flex gap-8">
+            <a href="#" className="hover:text-accent transition-colors">
+              Instagram
+            </a>
+            <a href="#" className="hover:text-accent transition-colors">
+              Pinterest
+            </a>
+            <a href="#" className="hover:text-accent transition-colors">
+              Email
+            </a>
+          </div>
+        </motion.div>
+      </footer>
+    </main>
   );
 }
