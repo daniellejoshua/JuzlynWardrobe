@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const occasions = ["All", "Casual", "Business", "Formal"];
-const seasons = ["All", "Summer", "Fall", "Winter", "Spring"];
 const clothingTypes = [
   "All",
   "Top",
@@ -36,13 +35,11 @@ const colorPalette: { name: string; hex: string }[] = [
 interface FilterBarProps {
   searchQuery: string;
   selectedOccasion: string;
-  selectedSeason: string;
   selectedClothingType: string;
   selectedColor: string;
   outfitCount: number;
   onSearchChange: (value: string) => void;
   onOccasionChange: (value: string) => void;
-  onSeasonChange: (value: string) => void;
   onClothingTypeChange: (value: string) => void;
   onColorChange: (value: string) => void;
 }
@@ -324,13 +321,11 @@ function ColorDropdown({
 export const FilterBar = memo(function FilterBar({
   searchQuery,
   selectedOccasion,
-  selectedSeason,
   selectedClothingType,
   selectedColor,
   outfitCount,
   onSearchChange,
   onOccasionChange,
-  onSeasonChange,
   onClothingTypeChange,
   onColorChange,
 }: FilterBarProps) {
@@ -375,12 +370,6 @@ export const FilterBar = memo(function FilterBar({
           options={occasions}
           selected={selectedOccasion}
           onChange={onOccasionChange}
-        />
-        <FilterDropdown
-          label="Season"
-          options={seasons}
-          selected={selectedSeason}
-          onChange={onSeasonChange}
         />
         <FilterDropdown
           label="Type"

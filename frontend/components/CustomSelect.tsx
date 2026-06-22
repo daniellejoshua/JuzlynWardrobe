@@ -60,7 +60,7 @@ export function CustomSelect({
   return (
     <>
       <div ref={dropdownRef} className="relative">
-        <label className="block text-sm font-semibold text-white mb-3">
+        <label className="block text-sm font-semibold text-white mb-2">
           {label} {required && <span className="text-accent">*</span>}
         </label>
         <button

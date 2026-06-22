@@ -46,7 +46,9 @@ const defaultThemes: ComboTheme[] = [
 function getThemes(selected: Outfit[]): ComboTheme[] {
   const counts: Record<string, number> = {};
   for (const o of selected) {
-    counts[o.occasion] = (counts[o.occasion] || 0) + 1;
+    if (o.occasion) {
+      counts[o.occasion] = (counts[o.occasion] || 0) + 1;
+    }
   }
   let best = "";
   let bestCount = 0;
@@ -75,12 +77,11 @@ function simulateCombinations(
 
     if (needed > 0) {
       const occasion = selected[0]?.occasion || "casual";
-      const season = selected[0]?.season || "all";
 
       const compatible = pool.filter(
         (o) =>
           !usedInPool.has(o.id) &&
-          (o.occasion === occasion || o.season === season),
+          o.occasion === occasion,
       );
 
       const fallback = pool.filter((o) => !usedInPool.has(o.id));
@@ -111,7 +112,6 @@ export default function WardrobePage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOccasion, setSelectedOccasion] = useState("All");
-  const [selectedSeason, setSelectedSeason] = useState("All");
   const [selectedClothingType, setSelectedClothingType] = useState("All");
   const [selectedColor, setSelectedColor] = useState("");
 
@@ -131,11 +131,6 @@ export default function WardrobePage() {
     resetPage();
   }, [resetPage]);
 
-  const handleSeasonChange = useCallback((value: string) => {
-    setSelectedSeason(value);
-    resetPage();
-  }, [resetPage]);
-
   const handleClothingTypeChange = useCallback((value: string) => {
     setSelectedClothingType(value);
     resetPage();
@@ -148,45 +143,39 @@ export default function WardrobePage() {
 
   const filteredOutfits = useMemo(() => {
     return demoOutfits.filter((outfit) => {
+      const search = searchQuery.toLowerCase();
       const matchesSearch =
         !searchQuery ||
-        outfit.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        outfit.description.toLowerCase().includes(searchQuery.toLowerCase());
+        outfit.clothing_type.toLowerCase().includes(search) ||
+        outfit.category.toLowerCase().includes(search) ||
+        outfit.style_tags.some((t) => t.toLowerCase().includes(search)) ||
+        (outfit.occasion && outfit.occasion.toLowerCase().includes(search));
 
       const matchesOccasion =
         selectedOccasion === "All" ||
-        outfit.occasion.toLowerCase() === selectedOccasion.toLowerCase();
-
-      const matchesSeason =
-        selectedSeason === "All" ||
-        outfit.season.toLowerCase() === selectedSeason.toLowerCase();
+        outfit.occasion?.toLowerCase() === selectedOccasion.toLowerCase();
 
       const matchesClothingType =
         selectedClothingType === "All" ||
-        outfit.clothingType.toLowerCase() ===
+        outfit.clothing_type.toLowerCase() ===
           selectedClothingType.toLowerCase();
 
       const matchesColor =
         !selectedColor ||
-        outfit.colors.some(
-          (c) => c.toLowerCase() === selectedColor.toLowerCase(),
-        );
+        (outfit.primary_color &&
+          outfit.primary_color
+            .split(",")
+            .map((c) => c.trim())
+            .some((c) => c.toLowerCase() === selectedColor.toLowerCase()));
 
       return (
         matchesSearch &&
         matchesOccasion &&
-        matchesSeason &&
         matchesClothingType &&
         matchesColor
       );
     });
-  }, [
-    searchQuery,
-    selectedOccasion,
-    selectedSeason,
-    selectedClothingType,
-    selectedColor,
-  ]);
+  }, [searchQuery, selectedOccasion, selectedClothingType, selectedColor]);
 
   const pageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredOutfits.length / OUTFITS_PER_PAGE)),
@@ -319,13 +308,11 @@ export default function WardrobePage() {
               <FilterBar
                 searchQuery={searchQuery}
                 selectedOccasion={selectedOccasion}
-                selectedSeason={selectedSeason}
                 selectedClothingType={selectedClothingType}
                 selectedColor={selectedColor}
                 outfitCount={filteredOutfits.length}
                 onSearchChange={handleSearchChange}
                 onOccasionChange={handleOccasionChange}
-                onSeasonChange={handleSeasonChange}
                 onClothingTypeChange={handleClothingTypeChange}
                 onColorChange={handleColorChange}
               />
@@ -502,7 +489,7 @@ export default function WardrobePage() {
                 {/* Hero image */}
                 <div className="md:w-1/2 relative h-64 md:h-96">
                   <Image
-                    src={currentCombo.items[0].image}
+                    src={currentCombo.items[0].image_url}
                     alt={currentCombo.name}
                     fill
                     className="object-cover"

@@ -12,7 +12,6 @@ const PAGE_SIZE = 10;
 export default function OutfitsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOccasion, setSelectedOccasion] = useState("All");
-  const [selectedSeason, setSelectedSeason] = useState("All");
   const [selectedClothingType, setSelectedClothingType] = useState("All");
   const [selectedColor, setSelectedColor] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,14 +29,6 @@ export default function OutfitsPage() {
   const handleOccasionChange = useCallback(
     (value: string) => {
       setSelectedOccasion(value);
-      goToFirstPage();
-    },
-    [goToFirstPage],
-  );
-
-  const handleSeasonChange = useCallback(
-    (value: string) => {
-      setSelectedSeason(value);
       goToFirstPage();
     },
     [goToFirstPage],
@@ -61,45 +52,39 @@ export default function OutfitsPage() {
 
   const filteredOutfits = useMemo(() => {
     return demoOutfits.filter((outfit) => {
+      const search = searchQuery.toLowerCase();
       const matchesSearch =
         !searchQuery ||
-        outfit.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        outfit.description.toLowerCase().includes(searchQuery.toLowerCase());
+        outfit.clothing_type.toLowerCase().includes(search) ||
+        outfit.category.toLowerCase().includes(search) ||
+        outfit.style_tags.some((t) => t.toLowerCase().includes(search)) ||
+        (outfit.occasion && outfit.occasion.toLowerCase().includes(search));
 
       const matchesOccasion =
         selectedOccasion === "All" ||
-        outfit.occasion.toLowerCase() === selectedOccasion.toLowerCase();
-
-      const matchesSeason =
-        selectedSeason === "All" ||
-        outfit.season.toLowerCase() === selectedSeason.toLowerCase();
+        outfit.occasion?.toLowerCase() === selectedOccasion.toLowerCase();
 
       const matchesClothingType =
         selectedClothingType === "All" ||
-        outfit.clothingType.toLowerCase() ===
+        outfit.clothing_type.toLowerCase() ===
           selectedClothingType.toLowerCase();
 
       const matchesColor =
         !selectedColor ||
-        outfit.colors.some(
-          (c) => c.toLowerCase() === selectedColor.toLowerCase(),
-        );
+        (outfit.primary_color &&
+          outfit.primary_color
+            .split(",")
+            .map((c) => c.trim())
+            .some((c) => c.toLowerCase() === selectedColor.toLowerCase()));
 
       return (
         matchesSearch &&
         matchesOccasion &&
-        matchesSeason &&
         matchesClothingType &&
         matchesColor
       );
     });
-  }, [
-    searchQuery,
-    selectedOccasion,
-    selectedSeason,
-    selectedClothingType,
-    selectedColor,
-  ]);
+  }, [searchQuery, selectedOccasion, selectedClothingType, selectedColor]);
 
   const totalPages = Math.max(
     1,
@@ -137,10 +122,8 @@ export default function OutfitsPage() {
       />
       <div className="absolute inset-0 backdrop-blur-3xl" />
 
-      {/* Navigation */}
       <NavBar currentPage="outfits" />
 
-      {/* Main content */}
       <div className="relative z-10 px-6 py-6 md:px-12 md:py-8">
         {/* Header */}
         <motion.div
@@ -157,18 +140,15 @@ export default function OutfitsPage() {
           </p>
         </motion.div>
 
-        {/* Filter bar (search always visible, filters collapsible) */}
         <div className="mb-6">
           <FilterBar
             searchQuery={searchQuery}
             selectedOccasion={selectedOccasion}
-            selectedSeason={selectedSeason}
             selectedClothingType={selectedClothingType}
             selectedColor={selectedColor}
             outfitCount={filteredOutfits.length}
             onSearchChange={handleSearchChange}
             onOccasionChange={handleOccasionChange}
-            onSeasonChange={handleSeasonChange}
             onClothingTypeChange={handleClothingTypeChange}
             onColorChange={handleColorChange}
           />

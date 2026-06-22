@@ -1,134 +1,123 @@
 export interface Outfit {
   id: string;
   name: string;
-  description: string;
-  image: string;
-  colors: string[];
-  occasion: string;
-  season: string;
-  clothingType: string;
+  image_url: string;
+  clothing_type: string;
   category: string;
+  primary_color: string | null;
+  style_tags: string[];
+  occasion: string | null;
 }
 
 export const demoOutfits: Outfit[] = [
   {
     id: "1",
-    name: "Classic Blazer Ensemble",
-    description: "Timeless navy blazer with white shirt",
-    image:
+    name: "Navy Blazer Jacket",
+    image_url:
       "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300&h=400&fit=crop",
-    colors: ["navy", "white"],
-    occasion: "business",
-    season: "all",
-    clothingType: "Jacket",
+    clothing_type: "Jacket",
     category: "Business",
+    primary_color: "navy,white",
+    style_tags: ["classic", "blazer"],
+    occasion: "business",
   },
   {
     id: "2",
-    name: "Casual Summer Dress",
-    description: "Flowing linen dress perfect for warm days",
-    image:
+    name: "Cream Linen Dress",
+    image_url:
       "https://images.unsplash.com/photo-1572804419301-6b2c2ef11c18?w=300&h=400&fit=crop",
-    colors: ["cream", "beige"],
-    occasion: "casual",
-    season: "summer",
-    clothingType: "Dress",
+    clothing_type: "Dress",
     category: "Casual",
+    primary_color: "cream,beige",
+    style_tags: ["linen", "flowing"],
+    occasion: "casual",
   },
   {
     id: "3",
-    name: "Evening Elegance",
-    description: "Sophisticated black gown for special occasions",
-    image:
+    name: "Black Gold Gown",
+    image_url:
       "https://images.unsplash.com/photo-1595777712802-e2c19842edd7?w=300&h=400&fit=crop",
-    colors: ["black", "gold"],
-    occasion: "formal",
-    season: "all",
-    clothingType: "Dress",
+    clothing_type: "Dress",
     category: "Formal",
+    primary_color: "black,gold",
+    style_tags: ["elegant", "gown"],
+    occasion: "formal",
   },
   {
     id: "4",
-    name: "Street Style Chic",
-    description: "Trendy jeans with oversized sweater",
-    image:
+    name: "Grey Denim Top",
+    image_url:
       "https://images.unsplash.com/photo-1525962211207-8a15e7f1731e?w=300&h=400&fit=crop",
-    colors: ["grey", "denim"],
-    occasion: "casual",
-    season: "fall",
-    clothingType: "Top",
+    clothing_type: "Top",
     category: "Casual",
+    primary_color: "grey,denim",
+    style_tags: ["trendy", "comfortable"],
+    occasion: "casual",
   },
   {
     id: "5",
-    name: "Monochrome Minimalist",
-    description: "All-white minimal outfit for modern look",
-    image:
+    name: "White Minimal Top",
+    image_url:
       "https://images.unsplash.com/photo-1490578474895-699cd4e2cf6f?w=300&h=400&fit=crop",
-    colors: ["white"],
-    occasion: "casual",
-    season: "summer",
-    clothingType: "Top",
+    clothing_type: "Top",
     category: "Casual",
+    primary_color: "white",
+    style_tags: ["minimal", "modern"],
+    occasion: "casual",
   },
   {
     id: "6",
-    name: "Vintage Inspired",
-    description: "Retro-styled outfit with classic pieces",
-    image:
+    name: "Burgundy Vintage Dress",
+    image_url:
       "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&h=400&fit=crop",
-    colors: ["burgundy", "cream"],
-    occasion: "casual",
-    season: "fall",
-    clothingType: "Dress",
+    clothing_type: "Dress",
     category: "Vintage",
+    primary_color: "burgundy,cream",
+    style_tags: ["retro", "classic"],
+    occasion: "casual",
   },
   {
     id: "7",
-    name: "Luxury Minimalist",
-    description: "Premium materials in neutral tones",
-    image:
+    name: "Beige Business Blouse",
+    image_url:
       "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=300&h=400&fit=crop",
-    colors: ["beige", "brown"],
-    occasion: "business",
-    season: "winter",
-    clothingType: "Top",
+    clothing_type: "Top",
     category: "Business",
+    primary_color: "beige,brown",
+    style_tags: ["premium", "neutral"],
+    occasion: "business",
   },
   {
     id: "8",
-    name: "Bohemian Dream",
-    description: "Free-spirited boho aesthetic",
-    image:
+    name: "Mustard Boho Dress",
+    image_url:
       "https://images.unsplash.com/photo-1520763185298-1b434c919eba?w=300&h=400&fit=crop",
-    colors: ["mustard", "brown"],
-    occasion: "casual",
-    season: "summer",
-    clothingType: "Dress",
+    clothing_type: "Dress",
     category: "Bohemian",
+    primary_color: "mustard,brown",
+    style_tags: ["boho", "free-spirited"],
+    occasion: "casual",
   },
   {
     id: "9",
-    name: "Professional Power",
-    description: "Bold statement pieces for impact",
-    image:
+    name: "Charcoal Statement Jacket",
+    image_url:
       "https://images.unsplash.com/photo-1551589985-acba8f45b703?w=300&h=400&fit=crop",
-    colors: ["charcoal", "red"],
-    occasion: "business",
-    season: "all",
-    clothingType: "Jacket",
+    clothing_type: "Jacket",
     category: "Business",
+    primary_color: "charcoal,red",
+    style_tags: ["bold", "statement"],
+    occasion: "business",
   },
   {
     id: "10",
-    name: "Athletic Chic",
-    description: "Sportswear with style for active lifestyle",
-    image:
+    name: "Black Athletic Tee",
+    image_url:
       "https://images.unsplash.com/photo-1506629082632-33565a1697a1?w=300&h=400&fit=crop",
-    colors: ["black", "white"],
-    occasion: "casual",
-    season: "all",
-    clothingType: "Top",
+    clothing_type: "Top",
     category: "Athletic",
+    primary_color: "black,white",
+    style_tags: ["sportswear", "active"],
+    occasion: "casual",
   },
 ];

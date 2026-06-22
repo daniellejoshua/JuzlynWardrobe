@@ -24,6 +24,10 @@ export const OutfitCard = memo(function OutfitCard({
   showRemoveButton = false,
   onRemove,
 }: OutfitCardProps) {
+  const colors = outfit.primary_color
+    ? outfit.primary_color.split(",").map((c) => c.trim())
+    : [];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -67,8 +71,8 @@ export const OutfitCard = memo(function OutfitCard({
       {/* Image */}
       <div className={`relative w-full overflow-hidden ${compact ? "h-36" : "h-56"}`}>
         <Image
-          src={outfit.image}
-          alt={outfit.name}
+          src={outfit.image_url}
+          alt={outfit.clothing_type}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -77,14 +81,13 @@ export const OutfitCard = memo(function OutfitCard({
       {/* Card content */}
       <div className={`absolute inset-0 flex flex-col justify-between z-20 ${compact ? "p-3" : "p-4"}`}>
         {/* Top tags */}
-        <div className="flex gap-1.5 flex-wrap">
-          <span className={`rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 ${compact ? "text-[10px] px-2 py-0.5" : "text-xs px-3 py-1"}`}>
-            {outfit.occasion}
-          </span>
-          <span className={`rounded-full bg-accent/20 backdrop-blur-sm border border-accent/30 text-accent ${compact ? "text-[10px] px-2 py-0.5" : "text-xs px-3 py-1"}`}>
-            {outfit.season}
-          </span>
-        </div>
+        {outfit.occasion && (
+          <div className="flex gap-1.5 flex-wrap">
+            <span className={`rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 ${compact ? "text-[10px] px-2 py-0.5" : "text-xs px-3 py-1"}`}>
+              {outfit.occasion}
+            </span>
+          </div>
+        )}
 
         {/* Bottom info */}
         <div className={compact ? "space-y-1" : "space-y-2"}>
@@ -93,22 +96,22 @@ export const OutfitCard = memo(function OutfitCard({
           </h3>
           {!compact && (
             <p className="text-xs text-white/60 line-clamp-2">
-              {outfit.description}
+              {outfit.category}
             </p>
           )}
           {/* Color palette */}
-          <div className="flex gap-1.5 pt-1">
-            {outfit.colors.map((color, idx) => (
-              <div
-                key={idx}
-                className={`rounded-full border border-white/30 ${compact ? "w-2 h-2" : "w-3 h-3"}`}
-                style={{
-                  backgroundColor: getColorCode(color),
-                }}
-                title={color}
-              />
-            ))}
-          </div>
+          {colors.length > 0 && (
+            <div className="flex gap-1.5 pt-1">
+              {colors.map((color, idx) => (
+                <div
+                  key={idx}
+                  className={`rounded-full border border-white/30 ${compact ? "w-2 h-2" : "w-3 h-3"}`}
+                  style={{ backgroundColor: getColorCode(color) }}
+                  title={color}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

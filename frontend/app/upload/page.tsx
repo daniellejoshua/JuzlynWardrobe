@@ -10,6 +10,7 @@ import { NavBar } from "@/components/nav-bar";
 export default function UploadPage() {
   const [formData, setFormData] = useState({
     file: null as File | null,
+    name: "",
     clothingType: "",
     category: "",
     primaryColor: "",
@@ -169,127 +170,144 @@ export default function UploadPage() {
               className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 md:p-6"
             >
               <form onSubmit={handleSubmit}>
-                <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
-                  {/* Form Fields */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4, duration: 0.5 }}
-                    className="lg:w-2/5 flex flex-col gap-4"
-                  >
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <CustomSelect
-                          name="clothingType"
-                          value={formData.clothingType}
-                          onChange={handleInputChange}
-                          options={clothingTypes}
-                          label="Clothing Type"
-                          required
-                          placeholder="Select type"
-                        />
-
-                        <CustomSelect
-                          name="category"
-                          value={formData.category}
-                          onChange={handleInputChange}
-                          options={categories}
-                          label="Category"
-                          required
-                          placeholder="Select category"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-semibold text-white mb-2">
-                          Primary Color
-                        </label>
-                        <input
-                          type="text"
-                          name="primaryColor"
-                          value={formData.primaryColor}
-                          onChange={handleInputChange}
-                          placeholder="e.g. Stripes, Blue, Floral"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-accent/50 focus:bg-white/8 transition-all"
-                        />
-                      </div>
-
-                      <CustomSelect
-                        name="occasion"
-                        value={formData.occasion}
-                        onChange={handleInputChange}
-                        options={occasions}
-                        label="Best Occasion"
-                        placeholder="Select occasion"
-                      />
-
-                      <div>
-                        <label className="block text-sm font-semibold text-white mb-2">
-                          Style Tags
-                        </label>
-                        <textarea
-                          name="styleTags"
-                          value={formData.styleTags}
-                          onChange={handleInputChange}
-                          placeholder="E.g., elegant, minimalist, vintage, bold"
-                          rows={2}
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-accent/50 focus:bg-white/8 transition-all resize-none"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Button Group */}
-                    <div className="flex gap-3 mt-auto">
-                      <Link href="/" className="flex-1">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur px-6 py-2.5"
-                        >
-                          Cancel
-                        </Button>
-                      </Link>
-                      <button
-                        type="submit"
-                        className="flex-1 px-6 py-2.5 bg-white hover:bg-white/90 text-background font-medium rounded-lg transition-all"
-                      >
-                        Add to Wardrobe
-                      </button>
-                    </div>
-                  </motion.div>
-
-                  {/* Image Preview */}
-                  <motion.div
-                    initial={{ opacity: 0, x: 30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                    className="lg:w-3/5"
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      id="file-upload"
-                    />
-                    <label
-                      htmlFor="file-upload"
-                      className="block w-full rounded-2xl overflow-hidden border border-white/10 hover:border-accent/50 transition-all duration-300 group cursor-pointer"
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
+                    {/* Form Fields */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4, duration: 0.5 }}
+                      className="lg:w-2/5 flex flex-col"
                     >
-                      <div className="relative w-full">
-                        <img
-                          src={preview}
-                          alt="Preview"
-                          className="w-full h-auto max-h-[70vh] object-contain"
+                      <div className="flex flex-col gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-white mb-2">
+                            Name <span className="text-red-400">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            placeholder="e.g. Navy Blazer Jacket"
+                            required
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-accent/50 focus:bg-white/8 transition-all"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <CustomSelect
+                            name="clothingType"
+                            value={formData.clothingType}
+                            onChange={handleInputChange}
+                            options={clothingTypes}
+                            label="Clothing Type"
+                            required
+                            placeholder="Select type"
+                          />
+
+                          <CustomSelect
+                            name="category"
+                            value={formData.category}
+                            onChange={handleInputChange}
+                            options={categories}
+                            label="Category"
+                            required
+                            placeholder="Select category"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-white mb-2">
+                            Primary Color
+                          </label>
+                          <input
+                            type="text"
+                            name="primaryColor"
+                            value={formData.primaryColor}
+                            onChange={handleInputChange}
+                            placeholder="e.g. Stripes, Blue, Floral"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-accent/50 focus:bg-white/8 transition-all"
+                          />
+                        </div>
+
+                        <CustomSelect
+                          name="occasion"
+                          value={formData.occasion}
+                          onChange={handleInputChange}
+                          options={occasions}
+                          label="Best Occasion"
+                          placeholder="Select occasion"
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                          <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 px-4 py-2 rounded-lg backdrop-blur-sm">
-                            Click to change
-                          </span>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-white mb-2">
+                            Style Tags
+                          </label>
+                          <textarea
+                            name="styleTags"
+                            value={formData.styleTags}
+                            onChange={handleInputChange}
+                            placeholder="E.g., elegant, minimalist, vintage, bold"
+                            rows={2}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-accent/50 focus:bg-white/8 transition-all resize-none"
+                          />
                         </div>
                       </div>
-                    </label>
-                  </motion.div>
+                    </motion.div>
+
+                    {/* Image Preview */}
+                    <motion.div
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5, duration: 0.5 }}
+                      className="lg:w-3/5"
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <label
+                        htmlFor="file-upload"
+                        className="block rounded-2xl overflow-hidden border border-white/10 hover:border-accent/50 transition-all duration-300 group cursor-pointer"
+                      >
+                        <div className="relative">
+                          <img
+                            src={preview}
+                            alt="Preview"
+                            className="w-full object-contain max-h-[60vh]"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                            <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 px-4 py-2 rounded-lg backdrop-blur-sm">
+                              Click to change
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+                    </motion.div>
+                  </div>
+
+                  {/* Button Group */}
+                  <div className="flex gap-3">
+                    <Link href="/" className="flex-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full border-white/20 text-white hover:bg-white/10 backdrop-blur px-6 py-2.5"
+                      >
+                        Cancel
+                      </Button>
+                    </Link>
+                    <button
+                      type="submit"
+                      className="flex-1 px-6 py-2.5 bg-white hover:bg-white/90 text-background font-medium rounded-lg transition-all"
+                    >
+                      Add to Wardrobe
+                    </button>
+                  </div>
                 </div>
               </form>
             </motion.div>
