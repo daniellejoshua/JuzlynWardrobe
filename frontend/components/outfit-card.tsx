@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Outfit } from "@/data/demo-outfits";
@@ -9,13 +10,19 @@ interface OutfitCardProps {
   onClick?: () => void;
   isSelected?: boolean;
   index?: number;
+  compact?: boolean;
+  showRemoveButton?: boolean;
+  onRemove?: () => void;
 }
 
-export function OutfitCard({
+export const OutfitCard = memo(function OutfitCard({
   outfit,
   onClick,
   isSelected = false,
   index = 0,
+  compact = false,
+  showRemoveButton = false,
+  onRemove,
 }: OutfitCardProps) {
   return (
     <motion.div
@@ -25,14 +32,40 @@ export function OutfitCard({
       viewport={{ once: true }}
       onClick={onClick}
       className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${
-        isSelected ? "ring-2 ring-accent" : ""
+        isSelected
+          ? "ring-2 ring-white scale-[1.02]"
+          : "hover:scale-[1.02]"
       }`}
     >
+      {/* Selected badge - checkmark */}
+      {isSelected && (
+        <div className="absolute top-2 left-2 z-30 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-lg">
+          <svg className="w-3 h-3 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      )}
+
+      {/* Remove button */}
+      {showRemoveButton && onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="absolute top-2 right-2 z-30 w-5 h-5 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
+        >
+          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
       {/* Glassmorphic overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
 
       {/* Image */}
-      <div className="relative w-full h-56 overflow-hidden">
+      <div className={`relative w-full overflow-hidden ${compact ? "h-36" : "h-56"}`}>
         <Image
           src={outfit.image}
           alt={outfit.name}
@@ -42,32 +75,33 @@ export function OutfitCard({
       </div>
 
       {/* Card content */}
-      <div className="absolute inset-0 flex flex-col justify-between p-4 z-20">
+      <div className={`absolute inset-0 flex flex-col justify-between z-20 ${compact ? "p-3" : "p-4"}`}>
         {/* Top tags */}
-        <div className="flex gap-2 flex-wrap">
-          <span className="text-xs px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80">
+        <div className="flex gap-1.5 flex-wrap">
+          <span className={`rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 ${compact ? "text-[10px] px-2 py-0.5" : "text-xs px-3 py-1"}`}>
             {outfit.occasion}
           </span>
-          <span className="text-xs px-3 py-1 rounded-full bg-accent/20 backdrop-blur-sm border border-accent/30 text-accent">
+          <span className={`rounded-full bg-accent/20 backdrop-blur-sm border border-accent/30 text-accent ${compact ? "text-[10px] px-2 py-0.5" : "text-xs px-3 py-1"}`}>
             {outfit.season}
           </span>
         </div>
 
         {/* Bottom info */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-serif font-bold text-white leading-tight group-hover:text-accent transition-colors">
+        <div className={compact ? "space-y-1" : "space-y-2"}>
+          <h3 className={`font-serif font-bold text-white leading-tight group-hover:text-accent transition-colors ${compact ? "text-sm" : "text-lg"}`}>
             {outfit.name}
           </h3>
-          <p className="text-xs text-white/60 line-clamp-2">
-            {outfit.description}
-          </p>
-
+          {!compact && (
+            <p className="text-xs text-white/60 line-clamp-2">
+              {outfit.description}
+            </p>
+          )}
           {/* Color palette */}
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-1.5 pt-1">
             {outfit.colors.map((color, idx) => (
               <div
                 key={idx}
-                className="w-3 h-3 rounded-full border border-white/30"
+                className={`rounded-full border border-white/30 ${compact ? "w-2 h-2" : "w-3 h-3"}`}
                 style={{
                   backgroundColor: getColorCode(color),
                 }}
@@ -82,7 +116,7 @@ export function OutfitCard({
       <div className="absolute inset-0 rounded-2xl border border-white/10 group-hover:border-white/30 transition-all duration-300 z-[5]" />
     </motion.div>
   );
-}
+});
 
 function getColorCode(colorName: string): string {
   const colors: Record<string, string> = {

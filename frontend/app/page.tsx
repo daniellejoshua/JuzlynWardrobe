@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { NavBar } from "@/components/nav-bar";
 
 export default function Home() {
   return (
@@ -28,48 +29,7 @@ export default function Home() {
       {/* Blur overlay */}
       <div className="absolute inset-0 backdrop-blur-3xl" />
 
-      {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-8 py-6 md:px-16">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-2xl font-serif font-bold tracking-tight text-white"
-        >
-          Your Wardrobe
-        </motion.h1>
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="flex items-center gap-8"
-        >
-          <Link
-            href="/wardrobe"
-            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
-          >
-            Style Consultant
-          </Link>
-          <Link
-            href="/gallery"
-            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
-          >
-            Favorites
-          </Link>
-          <Link
-            href="/upload"
-            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
-          >
-            Upload
-          </Link>
-          <a
-            href="#"
-            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
-          >
-            Contact
-          </a>
-        </motion.div>
-      </nav>
+      <NavBar currentPage="home" />
 
       {/* Hero Section */}
       <section className="relative z-10 px-8 py-20 md:px-16 md:py-32 lg:py-40 flex items-center min-h-[70vh]">

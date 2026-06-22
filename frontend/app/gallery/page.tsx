@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { demoOutfits } from "@/data/demo-outfits";
 import { OutfitGrid } from "@/components/outfit-grid";
+import { NavBar } from "@/components/nav-bar";
 
 export default function FavoritesPage() {
   // For demo, show all outfits as favorites
@@ -30,33 +31,7 @@ export default function FavoritesPage() {
       {/* Blur overlay */}
       <div className="absolute inset-0 backdrop-blur-3xl" />
 
-      {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-8 py-6 md:px-16 border-b border-white/10">
-        <Link href="/">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-xl font-serif font-bold tracking-tight text-white hover:text-accent transition-colors"
-          >
-            ← Your Wardrobe
-          </motion.h1>
-        </Link>
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="flex items-center gap-8"
-        >
-          <Link
-            href="/wardrobe"
-            className="text-sm font-light text-white/70 hover:text-accent transition-colors"
-          >
-            Meet Juzlyn
-          </Link>
-          <span className="text-sm font-light text-accent">Favorites</span>
-        </motion.div>
-      </nav>
+      <NavBar currentPage="gallery" />
 
       {/* Main content */}
       <div className="relative z-10 px-8 py-12 md:px-16 md:py-20 lg:py-24">

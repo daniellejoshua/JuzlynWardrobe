@@ -6,6 +6,8 @@ export interface Outfit {
   colors: string[];
   occasion: string;
   season: string;
+  clothingType: string;
+  category: string;
 }
 
 export const demoOutfits: Outfit[] = [
@@ -18,6 +20,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["navy", "white"],
     occasion: "business",
     season: "all",
+    clothingType: "Jacket",
+    category: "Business",
   },
   {
     id: "2",
@@ -28,6 +32,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["cream", "beige"],
     occasion: "casual",
     season: "summer",
+    clothingType: "Dress",
+    category: "Casual",
   },
   {
     id: "3",
@@ -38,6 +44,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["black", "gold"],
     occasion: "formal",
     season: "all",
+    clothingType: "Dress",
+    category: "Formal",
   },
   {
     id: "4",
@@ -48,6 +56,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["grey", "denim"],
     occasion: "casual",
     season: "fall",
+    clothingType: "Top",
+    category: "Casual",
   },
   {
     id: "5",
@@ -58,6 +68,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["white"],
     occasion: "casual",
     season: "summer",
+    clothingType: "Top",
+    category: "Casual",
   },
   {
     id: "6",
@@ -68,6 +80,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["burgundy", "cream"],
     occasion: "casual",
     season: "fall",
+    clothingType: "Dress",
+    category: "Vintage",
   },
   {
     id: "7",
@@ -78,6 +92,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["beige", "brown"],
     occasion: "business",
     season: "winter",
+    clothingType: "Top",
+    category: "Business",
   },
   {
     id: "8",
@@ -88,6 +104,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["mustard", "brown"],
     occasion: "casual",
     season: "summer",
+    clothingType: "Dress",
+    category: "Bohemian",
   },
   {
     id: "9",
@@ -98,6 +116,8 @@ export const demoOutfits: Outfit[] = [
     colors: ["charcoal", "red"],
     occasion: "business",
     season: "all",
+    clothingType: "Jacket",
+    category: "Business",
   },
   {
     id: "10",
@@ -108,5 +128,7 @@ export const demoOutfits: Outfit[] = [
     colors: ["black", "white"],
     occasion: "casual",
     season: "all",
+    clothingType: "Top",
+    category: "Athletic",
   },
 ];
