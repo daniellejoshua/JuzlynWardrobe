@@ -1,9 +1,9 @@
-const API_URL = process.env.API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export async function getOutfits() {
   const res = await fetch(`${API_URL}/outfits`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch outfits");
-  return res.json(); // { outfits: [...] }
+  return res.json();
 }
 
 export async function generateCombinations(outfitIds: string[]) {
@@ -14,5 +14,14 @@ export async function generateCombinations(outfitIds: string[]) {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to generate combinations");
-  return res.json(); // { combinations: [...] }
+  return res.json();
+}
+
+export async function uploadOutfit(formData: FormData) {
+  const res = await fetch(`${API_URL}/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Failed to Upload");
+  return res.json();
 }

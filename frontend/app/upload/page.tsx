@@ -278,7 +278,7 @@ export default function UploadPage() {
                           <img
                             src={preview}
                             alt="Preview"
-                            className="w-full object-contain max-h-[60vh]"
+                            className="w-full object-contain max-h-[82vh]"
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
                             <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 px-4 py-2 rounded-lg backdrop-blur-sm">
