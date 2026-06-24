@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { demoOutfits } from "@/data/demo-outfits";
+import { Outfit } from "@/data/demo-outfits";
+import { getOutfits } from "@/lib/api";
 import { OutfitGrid } from "@/components/outfit-grid";
 import { FilterBar } from "@/components/filter-bar";
 import { NavBar } from "@/components/nav-bar";
@@ -14,7 +15,17 @@ export default function OutfitsPage() {
   const [selectedOccasion, setSelectedOccasion] = useState("All");
   const [selectedClothingType, setSelectedClothingType] = useState("All");
   const [selectedColor, setSelectedColor] = useState("");
+  const [allOutfits, setAllOutfits] = useState<Outfit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    getOutfits()
+      .then((data) => setAllOutfits(data.outfits))
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const goToFirstPage = useCallback(() => setCurrentPage(1), []);
 
@@ -51,13 +62,13 @@ export default function OutfitsPage() {
   );
 
   const filteredOutfits = useMemo(() => {
-    return demoOutfits.filter((outfit) => {
+    return allOutfits.filter((outfit) => {
       const search = searchQuery.toLowerCase();
       const matchesSearch =
         !searchQuery ||
         outfit.clothing_type.toLowerCase().includes(search) ||
         outfit.category.toLowerCase().includes(search) ||
-        outfit.style_tags.some((t) => t.toLowerCase().includes(search)) ||
+        outfit.style_tags?.some((t) => t.toLowerCase().includes(search)) ||
         (outfit.occasion && outfit.occasion.toLowerCase().includes(search));
 
       const matchesOccasion =
@@ -84,7 +95,7 @@ export default function OutfitsPage() {
         matchesColor
       );
     });
-  }, [searchQuery, selectedOccasion, selectedClothingType, selectedColor]);
+  }, [searchQuery, selectedOccasion, selectedClothingType, selectedColor, allOutfits]);
 
   const totalPages = Math.max(
     1,
@@ -160,7 +171,23 @@ export default function OutfitsPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          {paginatedOutfits.length > 0 ? (
+          {loading ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
+            >
+              <p className="text-white/60">Loading outfits...</p>
+            </motion.div>
+          ) : error ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
+            >
+              <p className="text-red-400">{error}</p>
+            </motion.div>
+          ) : paginatedOutfits.length > 0 ? (
             <>
               <OutfitGrid
                 outfits={paginatedOutfits}

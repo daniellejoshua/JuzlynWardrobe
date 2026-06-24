@@ -3,11 +3,11 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { demoOutfits, Outfit } from "@/data/demo-outfits";
 import { OutfitCard } from "@/components/outfit-card";
 import { NavBar } from "@/components/nav-bar";
 import { FilterBar } from "@/components/filter-bar";
-
+import { Outfit } from "@/data/demo-outfits";
+import { getOutfits, generateCombinations } from "@/lib/api";
 const OUTFITS_PER_PAGE = 6;
 
 interface GeneratedCombo {
@@ -105,6 +105,9 @@ function simulateCombinations(
 }
 
 export default function WardrobePage() {
+  const [allOutfits, setAllOutfits] = useState<Outfit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [genLoading, setGenLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [combinations, setCombinations] = useState<GeneratedCombo[] | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -114,6 +117,17 @@ export default function WardrobePage() {
   const [selectedOccasion, setSelectedOccasion] = useState("All");
   const [selectedClothingType, setSelectedClothingType] = useState("All");
   const [selectedColor, setSelectedColor] = useState("");
+
+
+useEffect(() => {
+  getOutfits()
+    .then((data) => setAllOutfits(data.outfits))
+    .catch(() => {})
+    .finally(() => setLoading(false));
+}, []);
+
+
+
 
   const [outfitPage, setOutfitPage] = useState(0);
 
@@ -142,13 +156,13 @@ export default function WardrobePage() {
   }, [resetPage]);
 
   const filteredOutfits = useMemo(() => {
-    return demoOutfits.filter((outfit) => {
+    return allOutfits.filter((outfit) => {
       const search = searchQuery.toLowerCase();
       const matchesSearch =
         !searchQuery ||
         outfit.clothing_type.toLowerCase().includes(search) ||
         outfit.category.toLowerCase().includes(search) ||
-        outfit.style_tags.some((t) => t.toLowerCase().includes(search)) ||
+        outfit.style_tags?.some((t) => t.toLowerCase().includes(search)) ||
         (outfit.occasion && outfit.occasion.toLowerCase().includes(search));
 
       const matchesOccasion =
@@ -175,7 +189,7 @@ export default function WardrobePage() {
         matchesColor
       );
     });
-  }, [searchQuery, selectedOccasion, selectedClothingType, selectedColor]);
+  }, [searchQuery, selectedOccasion, selectedClothingType, selectedColor,allOutfits]);
 
   const pageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredOutfits.length / OUTFITS_PER_PAGE)),
@@ -214,12 +228,34 @@ export default function WardrobePage() {
     setCombinations(null);
   }, []);
 
-  const handleGenerate = useCallback(() => {
-    const result = simulateCombinations(selectedIds, demoOutfits);
-    setCombinations(result);
-    setCurrentComboIndex(0);
-    setShowResults(true);
-  }, [selectedIds]);
+const handleGenerate = useCallback(async()=>{
+  setGenLoading(true);
+  try{
+    const data = await generateCombinations(selectedIds)
+    const result: GeneratedCombo[] = data.combinations.map(
+        (combo: { name: string; description: string; items: number[] }, i: number) => ({
+          id: `combo-${i}`,
+          name: combo.name,
+          description: combo.description,
+          items: combo.items
+            .map((idx: number) => allOutfits[idx])
+            .filter(Boolean),
+        }),
+      );
+      setCombinations(result)
+      setCurrentComboIndex(0)
+      setShowResults(true)
+  }
+  catch{
+
+  }
+  finally{
+    setGenLoading(false)
+  }
+
+},[selectedIds,allOutfits])
+
+
 
   const closeResults = useCallback(() => {
     setShowResults(false);
@@ -323,22 +359,28 @@ export default function WardrobePage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <div className="grid grid-cols-2 gap-3">
-                {paginatedOutfits.map((outfit) => {
-                  const isSelected = selectedIds.includes(outfit.id);
-                  return (
-                    <OutfitCard
-                      key={outfit.id}
-                      outfit={outfit}
-                      compact
-                      isSelected={isSelected}
-                      showRemoveButton={isSelected}
-                      onRemove={() => removeSelection(outfit.id)}
-                      onClick={() => toggleSelection(outfit.id)}
-                      index={0}
-                    />
-                  );
-                })}
+                <div className="grid grid-cols-2 gap-3">
+                {loading ? (
+                  <div className="col-span-2 text-center py-8">
+                    <p className="text-white/40 text-sm">Loading outfits...</p>
+                  </div>
+                ) : (
+                  paginatedOutfits.map((outfit) => {
+                    const isSelected = selectedIds.includes(outfit.id);
+                    return (
+                      <OutfitCard
+                        key={outfit.id}
+                        outfit={outfit}
+                        compact
+                        isSelected={isSelected}
+                        showRemoveButton={isSelected}
+                        onRemove={() => removeSelection(outfit.id)}
+                        onClick={() => toggleSelection(outfit.id)}
+                        index={0}
+                      />
+                    );
+                  })
+                )}
               </div>
             </motion.div>
 
@@ -391,7 +433,7 @@ export default function WardrobePage() {
               {selectionCount > 0 ? (
                 <div className="flex flex-wrap gap-2 mb-4">
                   {selectedIds.map((id) => {
-                    const outfit = demoOutfits.find((o) => o.id === id);
+                    const outfit = allOutfits.find((o) => o.id === id);
                     if (!outfit) return null;
                     return (
                       <div key={id} className="w-24">
