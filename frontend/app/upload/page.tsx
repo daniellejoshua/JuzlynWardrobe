@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CustomSelect } from "@/components/CustomSelect";
 import { NavBar } from "@/components/nav-bar";
-
+import { uploadOutfit } from "@/lib/api";
+import { toast } from "sonner";
 export default function UploadPage() {
   const [formData, setFormData] = useState({
     file: null as File | null,
@@ -17,9 +18,9 @@ export default function UploadPage() {
     styleTags: "",
     occasion: "",
   });
-
-  const [preview, setPreview] = useState<string | null>(null);
-
+const [uploading,setUploading] = useState(false)
+const [preview, setPreview] = useState<string | null>(null);
+const [uploadError,setUploadError] = useState<string|null>(null)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -41,11 +42,37 @@ export default function UploadPage() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Handle form submission here
-  };
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   console.log("Form submitted:", formData);
+  //   // Handle form submission here
+  // };
+
+const handleSubmit = async(e:React.SubmitEvent) =>{
+  e.preventDefault()
+  if(!formData.file)return
+  setUploading(true);
+  try{
+    const fd = new FormData()
+    fd.append("file", formData.file)
+    fd.append("name", formData.name)
+    fd.append("category",formData.category)
+    fd.append("clothing_type",formData.clothingType)
+    fd.append("occasion",formData.occasion)
+    fd.append("primary_color",formData.primaryColor)
+    fd.append("style_tags",formData.styleTags)
+    await uploadOutfit(fd)
+    toast.success("Added to your wardrobe!")
+    setFormData({ file: null, name: "", clothingType: "", category: "", primaryColor: "", styleTags: "", occasion: ""
+});
+    setPreview(null);
+}catch(e){
+setUploadError(e instanceof Error ? e.message: "Upload Failed")
+}finally{
+setUploading(false)
+}
+}
+
 
   const clothingTypes = [
     "Top",
@@ -289,7 +316,9 @@ export default function UploadPage() {
                       </label>
                     </motion.div>
                   </div>
-
+{uploadError && (
+  <p className="text-red-400 text-xs text-center mt-2">{uploadError}</p>
+)}
                   {/* Button Group */}
                   <div className="flex gap-3">
                     <Link href="/" className="flex-1">
@@ -301,12 +330,15 @@ export default function UploadPage() {
                         Cancel
                       </Button>
                     </Link>
-                    <button
-                      type="submit"
-                      className="flex-1 px-6 py-2.5 bg-white hover:bg-white/90 text-background font-medium rounded-lg transition-all"
-                    >
-                      Add to Wardrobe
-                    </button>
+                    
+                 <button
+  type="submit"
+  disabled={uploading}
+  className="flex-1 px-6 py-2.5 bg-white hover:bg-white/90 text-background font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  {uploading ? "Uploading..." : "Add to Wardrobe"}
+  
+</button>
                   </div>
                 </div>
               </form>
