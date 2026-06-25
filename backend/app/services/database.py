@@ -1,11 +1,12 @@
 from app.services.supabase_client import supabase
 import json
-def create_outfit(image_url, clothing_type, category, user_id="00000000-0000-0000-0000-000000000000", primary_color=None, style_tags=None, occasion=None):
+def create_outfit(image_url, clothing_type, category,name, user_id="00000000-0000-0000-0000-000000000000", primary_color=None, style_tags=None, occasion=None):
     data ={
         "image_url":image_url,
         "user_id": user_id,
         "clothing_type":clothing_type,
-        "category":category
+        "category":category,
+        "name":name
     }
     if primary_color:
         data["primary_color"] = primary_color
