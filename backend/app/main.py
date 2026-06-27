@@ -3,7 +3,7 @@ load_dotenv("../.env")
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import upload,generate,outfits
+from app.api.routes import upload,generate,outfits,tryon
 
 app = FastAPI(title="AI WARDROBE STYLIST API")
 
@@ -20,6 +20,8 @@ app.add_middleware(
 app.include_router(upload.router, prefix="/upload", tags=["Upload"])
 app.include_router(generate.router, prefix="/generate", tags=["Generate"])
 app.include_router(outfits.router,prefix="/outfits",tags=["getAllOutfits"])
+app.include_router(tryon.router,prefix="/tryon",tags=["tryonCombo"])
+
 @app.get("/")
 def root():
     return{"message": "AI WARDROBE STYLIST API"}
