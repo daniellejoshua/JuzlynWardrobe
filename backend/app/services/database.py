@@ -36,3 +36,28 @@ def get_outfits_by_user_id(user_id="00000000-0000-0000-0000-000000000000"):
         return response.data or []
     except Exception as e: 
         raise Exception(str(e))
+    
+
+def upload_model(name,storage_path,file_size,version=None, user_id="00000000-0000-0000-0000-000000000000"):
+    data = {
+        "storage_path":storage_path,
+        "name":name,
+        "file_size":file_size,
+        "user_id":user_id
+    }
+    if version:
+        data["version"] = version
+    try:
+        response = supabase.table("models").insert(data).execute()
+        if not response.data:
+            raise Exception("Insert model returned no data")
+        return response.data[0]
+    except Exception as e:
+        raise Exception(str(e))
+    
+def get_models_by_user_id(user_id="00000000-0000-0000-0000-000000000000"):
+    try:
+        response = supabase.table("models").select("*").eq("user_id",user_id).execute()
+        return response.data or []
+    except Exception as e: 
+        raise Exception(str(e))
