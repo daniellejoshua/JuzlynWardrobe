@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-type PageId = "home" | "outfits" | "upload" | "gallery" | "wardrobe";
+type PageId = "home" | "outfits" | "upload" | "gallery" | "wardrobe" | "models";
 
 interface NavBarProps {
   currentPage: PageId;
@@ -12,6 +12,7 @@ interface NavBarProps {
 const navItems: { label: string; href: string; id: PageId }[] = [
   { label: "Style Consultant", href: "/wardrobe", id: "wardrobe" },
   { label: "Outfits", href: "/outfits", id: "outfits" },
+  { label: "Models", href: "/models", id: "models" },
   { label: "Upload", href: "/upload", id: "upload" },
   { label: "Favorites", href: "/gallery", id: "gallery" },
 ];

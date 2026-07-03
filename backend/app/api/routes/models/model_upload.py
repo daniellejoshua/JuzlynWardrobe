@@ -2,7 +2,7 @@ from fastapi import APIRouter, File, Form, UploadFile, HTTPException
 from app.services.database import upload_model
 from app.services.storage import upload_model as upload_model_storage
 from app.services.supabase_client import supabase
-
+import traceback
 
 
 router = APIRouter()
@@ -23,16 +23,21 @@ async def upload_models_to_db_bucket(
             record_id = record["id"] # type: ignore
         except Exception as e:
             raise HTTPException(500, detail=str(e))
+            print(traceback.format_exc())
         try:
               public_url,unique_name = upload_model_storage(file_bytes,file.filename or "upload.png",file.content_type)
         except Exception as e:
               supabase.table("models").delete().eq("id",record_id).execute()
               raise HTTPException(500,detail=str(e))
+              print(traceback.format_exc()) 
+
         try:
               result = supabase.table("models")\
               .update({"status":"completed","storage_path":unique_name})\
               .eq("id",record_id).execute()
+              print(traceback.format_exc()) 
+
         except Exception as e: 
               raise HTTPException(500,detail=(str(e)))
-        
+              print(traceback.format_exc()) 
         return result.data[0]
