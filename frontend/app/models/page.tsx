@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { NavBar } from "@/components/nav-bar";
-import { Form } from "react-hook-form";
-
+import {toast} from "sonner"
 interface Model {
   id: string;
   name: string;
@@ -53,12 +52,19 @@ export default function ModelsPage() {
       setModels((prev)=>[...prev,model]);
       setShowDialog(false);
       resetUploadForm();
-    } catch {
+    } catch(e){
+      toast.error(e instanceof Error ? e.message: "Upload Failed")
       // handle error
     } finally {
       setUploading(false);
     }
   };
+  useEffect(() => {
+  fetch(`${API_URL}/models`)
+    .then((res) => res.json())
+    .then((data) => setModels(data.models || data))
+    .catch(() => {});
+}, []);
 
   const resetUploadForm = () => {
     setUploadName("");
@@ -147,9 +153,9 @@ export default function ModelsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {models.map((model) => (
+              {models.map((model,index) => (
                 <motion.div
-                  key={model.id}
+                  key={model.id || index}
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -158,7 +164,7 @@ export default function ModelsPage() {
                   <div className="relative aspect-[3/4]">
                     <Image
                       src={getImageUrl(model.storage_path)}
-                      alt={model.name}
+                      alt={model.name || "Model Photo"}
                       fill
                       className="object-cover"
                     />
