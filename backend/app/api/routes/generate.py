@@ -6,6 +6,7 @@ from app.services.gemini import generate_combinations
 router = APIRouter()
 class GenerateRequest(BaseModel):
     outfits_ids:list[str]
+    model_id: str | None = None
 
 @router.post("/")
 def generate(request:GenerateRequest):

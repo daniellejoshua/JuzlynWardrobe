@@ -7,7 +7,7 @@ from app.services.tryon import LocalFashnVtonService
 router = APIRouter()
 service = LocalFashnVtonService()
 
-@router.post("/")
+@router.post("")
 async def try_on(person_image:UploadFile = File(...),outfit_ids:str=Form(...)):
     if not person_image.content_type or not person_image.content_type.startswith("image/"):
         raise HTTPException(400, "File must be an Image")
@@ -27,6 +27,6 @@ async def try_on(person_image:UploadFile = File(...),outfit_ids:str=Form(...)):
     if not outfits:
      raise HTTPException(401,"No outfits found on the selected ID")
     
-    items = [{"image_url": o["image_url"], "category": o["category"]} for o in outfits] # type: ignore
+    items = [{"image_url": o["image_url"], "category": o["clothing_type"]} for o in outfits] # type: ignore
     result_bytes = service.try_on_combo(person_bytes,items)
     return Response(content=result_bytes,media_type="image/png")
