@@ -8,6 +8,6 @@ export async function GET(request:Request){
         const supabase = createClient()
         await supabase.auth.exchangeCodeForSession(code)
     }
-    return NextResponse.redirect(`${origin}/wardrobe`)
+    return NextResponse.redirect(`${origin} `)
 }
 

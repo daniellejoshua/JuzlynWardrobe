@@ -4,8 +4,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { NavBar } from "@/components/nav-bar";
+import { useAuth } from "@/components/auth-provider";
 
 export default function Home() {
+  
   return (
     <main className="relative min-h-screen bg-background text-foreground overflow-y-auto">
       {/* Animated gradient background */}
