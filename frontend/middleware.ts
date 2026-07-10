@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
 
-const protectedRutes = ["/wardrobe", "/models", "/upload", "/outfits"];
+const protectedRutes = ["/wardrobe", "/models", "/upload", "/outfits", "/gallery"];
 
 export async function middleware(request:NextRequest){
     const response = NextResponse.next()
@@ -36,5 +36,5 @@ return response;
 
 }
 export const config = {
-  matcher: ["/wardrobe/:path*", "/models/:path*", "/upload/:path*", "/login", "/outfits"],
+  matcher: ["/wardrobe/:path*", "/models/:path*", "/upload/:path*", "/login", "/outfits","/gallery"],
 };

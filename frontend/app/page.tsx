@@ -61,7 +61,7 @@ export default function Home() {
             <Link href="/wardrobe">
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-background font-medium px-8"
+                className="bg-white hover:border-amber-100 text-background font-medium px-8"
               >
                 Start Styling
               </Button>
@@ -150,7 +150,7 @@ export default function Home() {
             <Link href="/wardrobe">
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-background font-medium px-8"
+                className="bg-white text-background font-medium px-8"
               >
                 Get Started
               </Button>
