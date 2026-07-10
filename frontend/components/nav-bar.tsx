@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-
-type PageId = "home" | "outfits" | "upload" | "gallery" | "wardrobe" | "models";
+import { useAuth } from "./auth-provider";
+type PageId = "home" | "outfits" | "upload" | "gallery" | "wardrobe" | "models" | "signOut";
 
 interface NavBarProps {
   currentPage: PageId;
@@ -18,6 +18,8 @@ const navItems: { label: string; href: string; id: PageId }[] = [
 ];
 
 export function NavBar({ currentPage }: NavBarProps) {
+  const { signOut }  = useAuth()
+
   const isHome = currentPage === "home";
 
   return (
@@ -57,6 +59,7 @@ export function NavBar({ currentPage }: NavBarProps) {
               </span>
             );
           }
+        
 
           return (
             <Link
@@ -68,6 +71,10 @@ export function NavBar({ currentPage }: NavBarProps) {
             </Link>
           );
         })}
+          <button onClick={signOut} className="text-xs md:text-sm font-light text-white/70 hover:text-white hover:underline underline-offset-4 decoration-white/40 transition-all"
+>
+            Sign Out
+          </button>
       </motion.div>
     </nav>
   );
