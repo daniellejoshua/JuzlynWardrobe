@@ -4,8 +4,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { NavBar } from "@/components/nav-bar";
+import { useAuth } from "@/components/auth-provider";
 
 export default function Home() {
+  
   return (
     <main className="relative min-h-screen bg-background text-foreground overflow-y-auto">
       {/* Animated gradient background */}
@@ -59,7 +61,7 @@ export default function Home() {
             <Link href="/wardrobe">
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-background font-medium px-8"
+                className="bg-white hover:border-amber-100 text-background font-medium px-8"
               >
                 Start Styling
               </Button>
@@ -148,7 +150,7 @@ export default function Home() {
             <Link href="/wardrobe">
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-background font-medium px-8"
+                className="bg-white text-background font-medium px-8"
               >
                 Get Started
               </Button>

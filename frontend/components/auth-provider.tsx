@@ -32,12 +32,17 @@ export function AuthProvider({children}:{children:React.ReactNode}){
       })
     }, [])
 
-    const signIn = async ()=>{
-        await supabase.auth.signInWithOAuth({
-            provider:"google",
-            options:{redirectTo: `${window.location.origin}/auth/callback`}
-        })
-    }
+ const signIn = async () => {
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+      queryParams: {
+        prompt: "select_account",
+      },
+    },
+  });
+};
 
     const signOut = async ()=>{
         await supabase.auth.signOut()
