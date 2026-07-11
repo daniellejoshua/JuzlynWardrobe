@@ -1,15 +1,16 @@
-from fastapi import APIRouter, File, Form, UploadFile, HTTPException
+from fastapi import APIRouter, File, Form, UploadFile, HTTPException,Depends
 from app.services.database import upload_model
 from app.services.storage import upload_model as upload_model_storage
 from app.services.supabase_client import supabase
-
+from app.auth.dependencies import get_current_user
 
 router = APIRouter()
 @router.post("/")
 async def upload_models_to_db_bucket(
     file: UploadFile = File(...),
     name:  str = Form(...),
-    version: str = Form(None)
+    version: str = Form(None),
+    user_id: str = Depends(get_current_user)
 ):
         if not file.content_type or not file.content_type.startswith("image/"):
                 raise HTTPException(400,"File must be png or jpg")
@@ -18,7 +19,7 @@ async def upload_models_to_db_bucket(
                 raise HTTPException(400, "Image must be under 5mb")
         unique_name = ""
         try:
-            record = upload_model(name=name,storage_path=unique_name,file_size=len(file_bytes),version=version, status="pending")
+            record = upload_model(user_id,name=name,storage_path=unique_name,file_size=len(file_bytes),version=version, status="pending")
             record_id = record["id"] # type: ignore
         except Exception as e:
             raise HTTPException(500, detail=str(e))

@@ -1,8 +1,8 @@
-from fastapi import APIRouter,Form,File,HTTPException, UploadFile
+from fastapi import APIRouter,Form,File,HTTPException, UploadFile, Depends
 from app.services.database import create_outfit
 from app.services.storage import  upload_image
 from app.services.supabase_client import supabase
-
+from app.auth.dependencies import get_current_user
 router = APIRouter()
 @router.post("/")
 async def upload_outfit(
@@ -12,7 +12,8 @@ async def upload_outfit(
     primary_color: str = Form(None),
     style_tags: str = Form(None),
     occasion: str = Form(None),
-    name: str = Form(None)
+    name: str = Form(None),
+    user_id: str = Depends(get_current_user)
 ):
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(400, "FILE EXTENSION MUST BE PNG/JPG")
@@ -32,7 +33,8 @@ async def upload_outfit(
             primary_color=primary_color,
             style_tags=style_tags,
             occasion=occasion,
-            name=name
+            name=name,
+            user_id=user_id
         )
     except Exception as e:
         if unique_name:
