@@ -1,15 +1,34 @@
+import { createClient } from "./supabase";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+async function getAccessToken(): Promise<string> {
+  const supabase = createClient()
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token ?? ""
+}
+
 
 export async function getOutfits() {
-  const res = await fetch(`${API_URL}/outfits`, { cache: "no-store" });
+  const token = await getAccessToken()
+  const res = await fetch(`${API_URL}/outfits`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+    cache: "no-store"
+  }
+  );
   if (!res.ok) throw new Error("Failed to fetch outfits");
   return res.json();
 }
 
 export async function generateCombinations(outfitIds: string[], modelId?: string) {
+  const token = await getAccessToken()
   const res = await fetch(`${API_URL}/generate`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({ outfits_ids: outfitIds, model_id: modelId }),
     cache: "no-store",
   });
@@ -18,7 +37,13 @@ export async function generateCombinations(outfitIds: string[], modelId?: string
 }
 
 export async function getModels() {
-  const res = await fetch(`${API_URL}/models`, { cache: "no-store" });
+  const token = await getAccessToken()
+  const res = await fetch(`${API_URL}/models`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+    cache: "no-store"
+  });
   if (!res.ok) throw new Error("Failed to fetch models");
   return res.json();
 }
@@ -42,10 +67,22 @@ export async function tryOnCombo(modelStoragePath: string, outfitIds: string[]) 
 }
 
 export async function uploadOutfit(formData: FormData) {
+  const token = await getAccessToken()
   const res = await fetch(`${API_URL}/upload`, {
     method: "POST",
+    headers: { "Authorization": `Bearer ${token}` },
     body: formData,
   });
   if (!res.ok) throw new Error("Failed to Upload");
+  return res.json();
+}
+export async function uploadModel(formData: FormData) {
+  const token = await getAccessToken()
+  const res = await fetch(`${API_URL}/models/upload`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${token}` },
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Upload failed");
   return res.json();
 }

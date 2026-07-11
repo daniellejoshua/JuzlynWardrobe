@@ -1,12 +1,12 @@
-from fastapi import APIRouter,HTTPException
+from fastapi import APIRouter,HTTPException,Depends
 from app.services.database import get_models_by_user_id
-
+from app.auth.dependencies import get_current_user
 
 router = APIRouter()
 @router.get("/")
-def list_model(user_id="00000000-0000-0000-0000-000000000000"):
+def list_model(user_id:str = Depends(get_current_user)):
     try:
         items = get_models_by_user_id(user_id=user_id)
         return {"models":items}
-    except Exception as e: 
+    except Exception as e:
        raise HTTPException(500,detail=str(e))
