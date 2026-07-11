@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { NavBar } from "@/components/nav-bar";
 import {toast} from "sonner"
+import { getModels, uploadModel } from "@/lib/api";
 interface Model {
   id: string;
   name: string;
@@ -47,8 +48,7 @@ export default function ModelsPage() {
       fd.append("file",uploadFile)
       fd.append("name",uploadName)
       if (uploadVersion) fd.append("version",uploadVersion)
-      const res = await fetch(`${API_URL}/models/upload`,{method:"POST",body:fd})
-      const model:Model = await res.json()
+      const model = await uploadModel(fd)
       setModels((prev)=>[...prev,model]);
       setShowDialog(false);
       resetUploadForm();
@@ -60,9 +60,8 @@ export default function ModelsPage() {
     }
   };
   useEffect(() => {
-  fetch(`${API_URL}/models`)
-    .then((res) => res.json())
-    .then((data) => setModels(data.models || data))
+     getModels()
+    .then((data) => setModels(data.models ||[]))
     .catch(() => {});
 }, []);
 
@@ -161,7 +160,7 @@ export default function ModelsPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="group rounded-xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden hover:border-white/20 transition-all"
                 >
-                  <div className="relative aspect-[3/4]">
+                  <div className="relative aspect-3/4">
                     <Image
                       src={getImageUrl(model.storage_path)}
                       alt={model.name || "Model Photo"}
