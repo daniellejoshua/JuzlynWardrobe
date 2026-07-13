@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
-import "./globals.css";
+import "./globals.css"; 
 import { AuthProvider } from "@/components/auth-provider";
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -13,7 +13,7 @@ const _playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Art Gallery | Curated Collection",
+  title: "Juzlyns Wardrobe",
   description:
     "An immersive art gallery experience with dynamic ambient backgrounds",
   generator: "v0.app",
