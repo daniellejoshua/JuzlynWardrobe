@@ -83,3 +83,18 @@ def get_models_by_user_id(user_id):
         return response.data or []
     except Exception as e:
         raise Exception(str(e))
+
+
+def save_to_favorites(user_id, image_url, outfit_ids, combo_name, combo_description):
+    data = {"user_id": user_id, "image_url": image_url, "outfit_ids": outfit_ids}
+    if combo_name:
+        data["combo_name"] = combo_name
+    if combo_description:
+        data["combo_description"] = combo_description
+    try:
+        response = supabase.table("favorites").insert(data).execute()  # type:ignore
+        if not response.data:
+            raise Exception("Insert to Favorites table error")
+        return response.data or []
+    except Exception as e:
+        raise Exception(str(e))
