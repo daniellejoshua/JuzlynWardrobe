@@ -8,6 +8,7 @@ import { NavBar } from "@/components/nav-bar";
 import { FilterBar } from "@/components/filter-bar";
 import { Outfit } from "@/data/demo-outfits";
 import { getOutfits, generateCombinations, getModels, tryOnCombo } from "@/lib/api";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface Model {
   id: string;
@@ -456,7 +457,7 @@ const handleGenerate = useCallback(async()=>{
                 <div className="grid grid-cols-2 gap-3">
                 {loading ? (
                   <div className="col-span-2 text-center py-8">
-                    <p className="text-white/40 text-sm">Loading outfits...</p>
+                    <LoadingSpinner message="Loading outfits..." />
                   </div>
                 ) : (
                   paginatedOutfits.map((outfit) => {
@@ -567,7 +568,7 @@ const handleGenerate = useCallback(async()=>{
                 </div>
 
                 {modelsLoading ? (
-                  <p className="text-xs text-white/30">Loading models...</p>
+                  <LoadingSpinner size="sm" message="Loading models..." />
                 ) : models.length === 0 ? (
                   <p className="text-xs text-white/30">
                     No models yet.{" "}
@@ -754,15 +755,7 @@ const handleGenerate = useCallback(async()=>{
 
                   {/* Try-on loading overlay */}
                   {tryOnLoading && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <svg className="animate-spin w-5 h-5 text-white/70" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                        </svg>
-                        <span className="text-[10px] text-white/60">Applying...</span>
-                      </div>
-                    </div>
+                    <LoadingSpinner variant="overlay" message="Applying..." />
                   )}
                 </div>
 
@@ -825,22 +818,22 @@ const handleGenerate = useCallback(async()=>{
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center"
           >
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className="relative flex flex-col items-center gap-4"
-            >
-              <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-2 border-white/10" />
-                <div className="absolute inset-0 rounded-full border-2 border-t-white/80 animate-spin" />
-              </div>
-              <p className="text-sm text-white/70 font-medium">Generating combinations...</p>
-            </motion.div>
+            <LoadingSpinner variant="fullscreen" message="Generating combinations..." />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── DIRECT TRY-ON OVERLAY ─── */}
+      <AnimatePresence>
+        {directTryOnLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <LoadingSpinner variant="fullscreen" message="Running try-on..." />
           </motion.div>
         )}
       </AnimatePresence>

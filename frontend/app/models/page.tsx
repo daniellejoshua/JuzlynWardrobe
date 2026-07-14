@@ -6,6 +6,7 @@ import Image from "next/image";
 import { NavBar } from "@/components/nav-bar";
 import {toast} from "sonner"
 import { getModels, uploadModel } from "@/lib/api";
+import { LoadingSpinner } from "@/components/loading-spinner";
 interface Model {
   id: string;
   name: string;
@@ -138,7 +139,7 @@ export default function ModelsPage() {
         >
           {loading ? (
             <div className="text-center py-16">
-              <p className="text-white/40 text-sm">Loading models...</p>
+              <LoadingSpinner message="Loading models..." />
             </div>
           ) : models.length === 0 ? (
             <div className="text-center py-16">

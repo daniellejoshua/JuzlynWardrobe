@@ -16,6 +16,7 @@ import {
 import { useAuth } from "./auth-provider"
 import { useEffect } from "react"
 import {redirect} from "next/navigation"
+import { LoadingSpinner } from "@/components/loading-spinner"
 export function LoginForm({
   className,
   ...props
@@ -26,7 +27,7 @@ export function LoginForm({
          if(!loading && user) redirect("/wardrobe");
        }, [user,loading])
    
-       if (loading) return <p>Loading....</p>
+       if (loading) return <LoadingSpinner />
        if(user) return null
    
   return (

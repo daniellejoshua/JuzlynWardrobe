@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from io import BytesIO
+
 import requests
-from PIL import Image
 import torch
+from PIL import Image
 
 WEIGHTS_DIR = "fashn-vton-1.5/weights"
 
@@ -14,9 +15,12 @@ CLOTHING_TYPE_TO_PIPELINE_CATEGORY = {
     "Dress": "one-pieces",
 }
 
+
 class TryOnService(ABC):
     @abstractmethod
-    def try_on_garment(self, person_bytes: bytes, garment_bytes: bytes, category: str) -> bytes:
+    def try_on_garment(
+        self, person_bytes: bytes, garment_bytes: bytes, category: str
+    ) -> bytes:
         """Single garment try-on. Returns PNG bytes."""
         ...
 
@@ -26,12 +30,15 @@ class TryOnService(ABC):
         Returns final composited PNG bytes."""
         PIPELINE_ORDER = {"tops": 0, "one-pieces": 0, "bottoms": 1}
         vton_items = [
-            item for item in items
+            item
+            for item in items
             if item["category"] in CLOTHING_TYPE_TO_PIPELINE_CATEGORY
         ]
-        vton_items.sort(key=lambda x: PIPELINE_ORDER.get(
-            CLOTHING_TYPE_TO_PIPELINE_CATEGORY[x["category"]], 0
-        ))
+        vton_items.sort(
+            key=lambda x: PIPELINE_ORDER.get(
+                CLOTHING_TYPE_TO_PIPELINE_CATEGORY[x["category"]], 0
+            )
+        )
         current = person_bytes
         for item in vton_items:
             garment_bytes = download_image(item["image_url"])
@@ -47,11 +54,13 @@ class LocalFashnVtonService(TryOnService):
         if self._pipeline is not None:
             return self._pipeline
         from fashn_vton import TryOnPipeline
+
         try:
-            self._pipeline = TryOnPipeline(weights_dir = WEIGHTS_DIR)
+            self._pipeline = TryOnPipeline(weights_dir=WEIGHTS_DIR)
         except torch.cuda.OutOfMemoryError:
-            self._pipeline = TryOnPipeline(weights_dir=WEIGHTS_DIR,device="cpu")
+            self._pipeline = TryOnPipeline(weights_dir=WEIGHTS_DIR, device="cpu")
         return self._pipeline
+
     def try_on_garment(self, person_bytes, garment_bytes, category):
         pipeline = self.load_pipeline()
         person = Image.open(BytesIO(person_bytes)).convert("RGB")
@@ -59,34 +68,20 @@ class LocalFashnVtonService(TryOnService):
         result = pipeline(
             person_image=person,
             garment_image=garment,
-            category=CLOTHING_TYPE_TO_PIPELINE_CATEGORY.get(category, "tops"), #type:ignore
+            category=CLOTHING_TYPE_TO_PIPELINE_CATEGORY.get(category, "tops"),  # type:ignore
             num_samples=1,
             num_timesteps=30,
         )
 
         buf = BytesIO()
-        result.images[0].save(buf,format="PNG")
+        result.images[0].save(buf, format="PNG")
         return buf.getvalue()
 
 
-def download_image(url:str)-> bytes:
-  resp = requests.get(url, timeout=30)
-  resp.raise_for_status()
-  return resp.content
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def download_image(url: str) -> bytes:
+    resp = requests.get(url, timeout=30)
+    resp.raise_for_status()
+    return resp.content
 
     # def __init__(self):
     #     self._pipeline = None
@@ -115,7 +110,6 @@ def download_image(url:str)-> bytes:
     #     buf = BytesIO()
     #     result.images[0].save(buf, format="PNG")
     #     return buf.getvalue()
-    
 
-            
-#   
+
+#
