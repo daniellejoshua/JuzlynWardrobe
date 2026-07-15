@@ -1,4 +1,5 @@
 from app.services.supabase_client import supabase
+from postgrest import CountMethod
 
 
 def create_outfit(
@@ -96,5 +97,22 @@ def save_to_favorites(user_id, image_url, outfit_ids, combo_name, combo_descript
         if not response.data:
             raise Exception("Insert to Favorites table error")
         return response.data or []
+    except Exception as e:
+        raise Exception(str(e))
+
+
+def get_favorites_by_user_id(user_id, offset=0, limit=10):
+    try:
+        end = offset + limit - 1
+        response = (
+            supabase.table("favorites")
+            .select("*")
+            .eq("user_id", user_id)
+            .order("created_at", desc=True)
+            .range(offset, end)
+            .execute()
+        )
+        data = response.data or []
+        return (data, len(data) == limit)
     except Exception as e:
         raise Exception(str(e))
