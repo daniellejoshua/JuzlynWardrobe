@@ -1,8 +1,9 @@
-from fastapi import UploadFile, HTTPException, APIRouter, Depends, File, Form
-from app.auth.dependencies import get_current_user
 import json
-from app.services.storage import upload_tryon_result
+
+from app.auth.dependencies import get_current_user
 from app.services.database import save_to_favorites
+from app.services.storage import upload_tryon_result
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 router = APIRouter()
 
@@ -30,7 +31,7 @@ async def saveToFavorites(
         raise HTTPException(400, f"Error on parsing outfits_ids {e.msg}")
 
     try:
-        public_url, unique_name = upload_tryon_result(
+        public_url, _ = upload_tryon_result(
             file_bytes, savedImage.filename or "upload.png", savedImage.content_type
         )
     except Exception as e:
