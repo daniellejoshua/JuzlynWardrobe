@@ -1,8 +1,5 @@
 import { generateCombinations, getModels, getOutfits, tryOnCombo, uploadModel, uploadOutfit, } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Outfit } from "next/font/google";
-import { use } from "react";
-import { fromTheme } from "tailwind-merge";
 
 
 // ── Queries ──
