@@ -20,41 +20,23 @@ export async function authFetch(url: string, options: RequestInit = {}) {
 
 
 export async function getOutfits() {
-  const token = await getAccessToken()
-  const res = await fetch(`${API_URL}/outfits`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    },
-    cache: "no-store"
-  }
-  );
+  const res = await authFetch("/outfits");
   if (!res.ok) throw new Error("Failed to fetch outfits");
   return res.json();
 }
 
 export async function generateCombinations(outfitIds: string[], modelId?: string) {
-  const token = await getAccessToken()
-  const res = await fetch(`${API_URL}/generate`, {
+  const res = await authFetch("/generate", {
     method: "POST",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ outfits_ids: outfitIds, model_id: modelId }),
-    cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to generate combinations");
   return res.json();
 }
 
 export async function getModels() {
-  const token = await getAccessToken()
-  const res = await fetch(`${API_URL}/models`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
-    },
-    cache: "no-store"
-  });
+  const res = await authFetch("/models");
   if (!res.ok) throw new Error("Failed to fetch models");
   return res.json();
 }
@@ -78,24 +60,34 @@ export async function tryOnCombo(modelStoragePath: string, outfitIds: string[]) 
 }
 
 export async function uploadOutfit(formData: FormData) {
-  const token = await getAccessToken()
-  const res = await fetch(`${API_URL}/upload`, {
+  const res = await authFetch("/upload", {
     method: "POST",
-    headers: { "Authorization": `Bearer ${token}` },
     body: formData,
   });
   if (!res.ok) throw new Error("Failed to Upload");
   return res.json();
 }
 export async function uploadModel(formData: FormData) {
-  const token = await getAccessToken()
-  const res = await fetch(`${API_URL}/models/upload`, {
+  const res = await authFetch("/models/upload", {
     method: "POST",
-    headers: { "Authorization": `Bearer ${token}` },
     body: formData,
   });
   if (!res.ok) throw new Error("Upload failed");
   return res.json();
 }
 
-export async function getFavorites()
+export async function getFavorites(page = 1, limit = 10) {
+  const res = await authFetch(`/favorites?page=${page}&limit=${limit}`);
+  if (!res.ok) throw new Error("Failed to fetch favorites");
+  return res.json();
+}
+
+export async function saveFavorite(formData: FormData) {
+  const res = await authFetch("/favorites/save", {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Failed to save favorite");
+  return res.json();
+}
+
