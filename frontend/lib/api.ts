@@ -7,6 +7,17 @@ async function getAccessToken(): Promise<string> {
   return data.session?.access_token ?? ""
 }
 
+export async function authFetch(url: string, options: RequestInit = {}) {
+  const token = await getAccessToken()
+  return fetch(`${API_URL}${url}`, {
+    ...options,
+    headers: {
+      ...options.headers,
+      "Authorization": `Bearer ${token}`
+    },
+  });
+}
+
 
 export async function getOutfits() {
   const token = await getAccessToken()
@@ -86,3 +97,5 @@ export async function uploadModel(formData: FormData) {
   if (!res.ok) throw new Error("Upload failed");
   return res.json();
 }
+
+export async function getFavorites()
