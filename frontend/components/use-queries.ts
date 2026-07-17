@@ -1,4 +1,4 @@
-import { generateCombinations, getModels, getOutfits, tryOnCombo, uploadModel, uploadOutfit, } from "@/lib/api";
+import { generateCombinations, getFavorites, getModels, getOutfits, saveFavorite, tryOnCombo, uploadModel, uploadOutfit, } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 
@@ -16,20 +16,17 @@ export function useModel() {
     return useQuery({
         queryKey: ["models"],
         queryFn: getModels,
-        staleTime: 30_00
+        staleTime: 30_000
     })
-
-
 }
 
-// export function useFavorites(page = 1, limit = 1) {
-//     const {get}
-//     return useQuery({
-//         queryKey: ["favorites", page, limit],
-//         queryFn:g
-//     })
-// }
-
+export function useFavorites(page = 1, limit = 10) {
+    return useQuery({
+        queryKey: ["favorites"],
+        queryFn: () => getFavorites(page, limit),
+        staleTime: 10_00
+    })
+}
 
 // ── Mutations ──
 
@@ -63,4 +60,14 @@ export function useTryOn() {
     return useMutation({
         mutationFn: ({ modelStoragePath, outfitIds }: { modelStoragePath: string, outfitIds: string[] }) => tryOnCombo(modelStoragePath, outfitIds)
     })
+}
+
+
+export function useSaveFavorites() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (formData: FormData) => saveFavorite(formData),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites"] })
+    })
+
 }
