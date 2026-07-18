@@ -1,9 +1,9 @@
 from app.services.supabase_client import supabase
-from postgrest import CountMethod
 
 
 def create_outfit(
     image_url,
+    storage_path,
     clothing_type,
     category,
     name,
@@ -15,6 +15,7 @@ def create_outfit(
 
     data = {
         "image_url": image_url,
+        "storage_path": storage_path,
         "user_id": user_id,
         "clothing_type": clothing_type,
         "category": category,
@@ -86,8 +87,15 @@ def get_models_by_user_id(user_id):
         raise Exception(str(e))
 
 
-def save_to_favorites(user_id, image_url, outfit_ids, combo_name, combo_description):
-    data = {"user_id": user_id, "image_url": image_url, "outfit_ids": outfit_ids}
+def save_to_favorites(
+    user_id, image_url, storage_path, outfit_ids, combo_name, combo_description
+):
+    data = {
+        "user_id": user_id,
+        "storage_path": storage_path,
+        "image_url": image_url,
+        "outfit_ids": outfit_ids,
+    }
     if combo_name:
         data["combo_name"] = combo_name
     if combo_description:

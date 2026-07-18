@@ -20,12 +20,12 @@ async def upload_models_to_db_bucket(
     file_bytes = await file.read()
     if len(file_bytes) > 5 * 1024 * 1024:
         raise HTTPException(400, "Image must be under 5mb")
-    unique_name = ""
+    storage_path = ""
     try:
         record = upload_model(
             user_id,
             name=name,
-            storage_path=unique_name,
+            storage_path=storage_path,
             file_size=len(file_bytes),
             version=version,
             status="pending",
@@ -34,7 +34,7 @@ async def upload_models_to_db_bucket(
     except Exception as e:
         raise HTTPException(500, detail=str(e))
     try:
-        public_url, unique_name = upload_model_storage(
+        _, storage_path = upload_model_storage(
             file_bytes, file.filename or "upload.png", file.content_type
         )
     except Exception as e:
@@ -44,7 +44,7 @@ async def upload_models_to_db_bucket(
     try:
         result = (
             supabase.table("models")
-            .update({"status": "completed", "storage_path": unique_name})
+            .update({"status": "completed", "storage_path": storage_path})
             .eq("id", record_id)
             .execute()
         )
