@@ -9,6 +9,7 @@ from app.api.routes.favorites import get_favorites, save_favorites  # noqa: E402
 from fastapi import FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 
+
 app = FastAPI(title="AI WARDROBE STYLIST API")
 
 
