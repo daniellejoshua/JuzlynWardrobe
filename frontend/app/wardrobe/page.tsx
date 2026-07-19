@@ -8,6 +8,8 @@ import { NavBar } from "@/components/nav-bar";
 import { FilterBar } from "@/components/filter-bar";
 import { Outfit } from "@/data/demo-outfits";
 import { getOutfits, generateCombinations, getModels, tryOnCombo } from "@/lib/api";
+import { useSaveFavorites } from "@/components/use-queries";
+import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
 interface Model {
@@ -130,6 +132,9 @@ export default function WardrobePage() {
   const [tryOnResults, setTryOnResults] = useState<Record<number, string>>({});
   const [directTryOnLoading, setDirectTryOnLoading] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [showModelPicker, setShowModelPicker] = useState(false);
+
+  const saveFavMutation = useSaveFavorites();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOccasion, setSelectedOccasion] = useState("All");
@@ -137,16 +142,16 @@ export default function WardrobePage() {
   const [selectedColor, setSelectedColor] = useState("");
 
 
-useEffect(() => {
-  getOutfits()
-    .then((data) => setAllOutfits(data.outfits))
-    .catch(() => {})
-    .finally(() => setLoading(false));
-  getModels()
-    .then((data) => setModels(data.models || data))
-    .catch(() => {})
-    .finally(() => setModelsLoading(false));
-}, []);
+  useEffect(() => {
+    getOutfits()
+      .then((data) => setAllOutfits(data.outfits))
+      .catch(() => { })
+      .finally(() => setLoading(false));
+    getModels()
+      .then((data) => setModels(data.models || data))
+      .catch(() => { })
+      .finally(() => setModelsLoading(false));
+  }, []);
 
 
 
@@ -194,7 +199,7 @@ useEffect(() => {
       const matchesClothingType =
         selectedClothingType === "All" ||
         outfit.clothing_type.toLowerCase() ===
-          selectedClothingType.toLowerCase();
+        selectedClothingType.toLowerCase();
 
       const matchesColor =
         !selectedColor ||
@@ -211,7 +216,7 @@ useEffect(() => {
         matchesColor
       );
     });
-  }, [searchQuery, selectedOccasion, selectedClothingType, selectedColor,allOutfits]);
+  }, [searchQuery, selectedOccasion, selectedClothingType, selectedColor, allOutfits]);
 
   const pageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredOutfits.length / OUTFITS_PER_PAGE)),
@@ -250,13 +255,13 @@ useEffect(() => {
     setCombinations(null);
   }, []);
 
-const handleGenerate = useCallback(async()=>{
-  Object.values(tryOnResults).forEach(URL.revokeObjectURL);
-  setTryOnResults({});
-  setGenLoading(true);
-  try{
-    const data = await generateCombinations(selectedIds, selectedModelId ?? undefined)
-    const result: GeneratedCombo[] = data.combinations.map(
+  const handleGenerate = useCallback(async () => {
+    Object.values(tryOnResults).forEach(URL.revokeObjectURL);
+    setTryOnResults({});
+    setGenLoading(true);
+    try {
+      const data = await generateCombinations(selectedIds, selectedModelId ?? undefined)
+      const result: GeneratedCombo[] = data.combinations.map(
         (combo: { name: string; description: string; items: number[] }, i: number) => ({
           id: `combo-${i}`,
           name: combo.name,
@@ -269,15 +274,15 @@ const handleGenerate = useCallback(async()=>{
       setCombinations(result)
       setCurrentComboIndex(0)
       setShowResults(true)
-  }
-  catch{
+    }
+    catch {
 
-  }
-  finally{
-    setGenLoading(false)
-  }
+    }
+    finally {
+      setGenLoading(false)
+    }
 
-},[selectedIds,selectedModelId,allOutfits,tryOnResults])
+  }, [selectedIds, selectedModelId, allOutfits, tryOnResults])
 
 
 
@@ -373,6 +378,10 @@ const handleGenerate = useCallback(async()=>{
   const anyLoading = genLoading || directTryOnLoading;
   const canGenerate = selectionCount > 0 && selectedModelId !== null && !anyLoading;
   const currentCombo = combinations?.[currentComboIndex];
+  const selectedModel = models.find(m => m.id === selectedModelId)
+  const selectedModelUrl = selectedModel && process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/model-photos/${selectedModel.storage_path}`
+    : ""
 
   const CLOTHING_KIND: Record<string, string> = {
     Top: "top",
@@ -454,7 +463,7 @@ const handleGenerate = useCallback(async()=>{
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-                <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {loading ? (
                   <div className="col-span-2 text-center py-8">
                     <LoadingSpinner message="Loading outfits..." />
@@ -467,6 +476,7 @@ const handleGenerate = useCallback(async()=>{
                         key={outfit.id}
                         outfit={outfit}
                         compact
+                        showOccasion={false}
                         isSelected={isSelected}
                         showRemoveButton={isSelected}
                         onRemove={() => removeSelection(outfit.id)}
@@ -536,6 +546,7 @@ const handleGenerate = useCallback(async()=>{
                         <OutfitCard
                           outfit={outfit}
                           compact
+                          showOccasion={false}
                           showRemoveButton
                           onRemove={() => removeSelection(id)}
                           onClick={() => toggleSelection(id)}
@@ -587,11 +598,10 @@ const handleGenerate = useCallback(async()=>{
                         <button
                           key={model.id}
                           onClick={() => setSelectedModelId(isSelected ? null : model.id)}
-                          className={`flex-shrink-0 w-16 rounded-lg overflow-hidden border-2 transition-all ${
-                            isSelected
+                          className={`flex-shrink-0 w-16 rounded-lg overflow-hidden border-2 transition-all ${isSelected
                               ? "border-white ring-1 ring-white/20"
                               : "border-transparent hover:border-white/30"
-                          }`}
+                            }`}
                         >
                           <div className="relative aspect-[3/4]">
                             <Image
@@ -617,11 +627,10 @@ const handleGenerate = useCallback(async()=>{
                 <button
                   onClick={handleGenerate}
                   disabled={!canGenerate}
-                  className={`w-full py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    canGenerate
+                  className={`w-full py-2.5 rounded-lg text-sm font-medium transition-all ${canGenerate
                       ? "bg-white text-background hover:bg-white/90"
                       : "bg-white/5 text-white/30 border border-white/10 cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   {!selectedModelId
                     ? "Select a model and outfits to begin"
@@ -639,11 +648,10 @@ const handleGenerate = useCallback(async()=>{
                 <button
                   onClick={handleDirectTryOn}
                   disabled={!canDirectTryOn}
-                  className={`w-full py-2 rounded-lg text-xs font-medium transition-all border ${
-                    !canDirectTryOn
+                  className={`w-full py-2 rounded-lg text-xs font-medium transition-all border ${!canDirectTryOn
                       ? "bg-white/5 text-white/30 border-white/10 cursor-not-allowed"
                       : "border-white/15 text-white/70 hover:bg-white/5 hover:text-white hover:border-white/30"
-                  }`}
+                    }`}
                 >
                   {directTryOnLoading
                     ? "Running try-on..."
@@ -683,7 +691,7 @@ const handleGenerate = useCallback(async()=>{
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.25 }}
-              className="relative w-full max-w-xl rounded-xl border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-2xl overflow-hidden shadow-2xl"
+              className="relative w-full max-w-2xl max-h-[90vh] rounded-xl border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-2xl overflow-hidden shadow-2xl"
             >
               {/* Dialog header */}
               <div className="flex items-center justify-between px-3 pt-3 pb-1">
@@ -720,7 +728,7 @@ const handleGenerate = useCallback(async()=>{
               <div className="flex flex-col md:flex-row">
                 {/* Hero image */}
                 <div
-                  className="md:w-1/2 relative h-48 md:h-72 cursor-pointer bg-zinc-900/60"
+                  className="md:w-1/2 relative h-48 md:h-96 cursor-pointer bg-zinc-900/60"
                   onClick={() => {
                     if (tryOnResults[currentComboIndex]) {
                       setFullscreenImage(tryOnResults[currentComboIndex]);
@@ -738,11 +746,24 @@ const handleGenerate = useCallback(async()=>{
                     </div>
                   )}
                   <Image
-                    src={tryOnResults[currentComboIndex] || currentCombo.items[0].image_url}
+                    src={tryOnResults[currentComboIndex] || selectedModelUrl}
                     alt={currentCombo.name}
                     fill
                     className={tryOnResults[currentComboIndex] ? "object-contain" : "object-cover"}
                   />
+
+                  {/* Change model overlay on hover (only when showing model photo) */}
+                  {!tryOnResults[currentComboIndex] && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 bg-black/40 pointer-events-auto">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setShowModelPicker(true); }}
+                        className="px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium hover:bg-white/20 transition-colors"
+                      >
+                        Change Model
+                      </button>
+                    </div>
+                  )}
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute bottom-0 left-0 right-0 p-3">
                     <h4 className="text-sm font-serif font-bold text-white mb-0.5">
@@ -759,51 +780,99 @@ const handleGenerate = useCallback(async()=>{
                   )}
                 </div>
 
-                {/* Items needed */}
-                <div className="md:w-1/2 p-3">
-                  <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider mb-2 block">
-                    Items Needed
-                  </span>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {currentCombo.items.map((item) => (
-                      <OutfitCard
-                        key={item.id}
-                        outfit={item}
-                        compact
-                        index={0}
-                      />
-                    ))}
+                {/* Items + controls */}
+                <div className="md:w-1/2 p-3 flex flex-col justify-between md:h-96">
+                  <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent">
+                    {/* Items grid */}
+                    <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider mb-2 block">
+                      Items
+                    </span>
+                    <div className="grid grid-cols-2 gap-1.5 mb-3">
+                      {currentCombo.items.map((item) => (
+                        <OutfitCard key={item.id} outfit={item} compact index={0} showOccasion={false} />
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Try-on button */}
-                  <button
-                    onClick={handleTryOn}
-                    disabled={tryOnLoading}
-                    className={`w-full mt-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
-                      tryOnLoading
-                        ? "bg-white/5 text-white/30 border border-white/10 cursor-not-allowed"
-                        : tryOnResults[currentComboIndex]
-                          ? "bg-white/10 text-white/70 border border-white/20 hover:bg-white/20"
-                          : "bg-white text-background hover:bg-white/90"
-                    }`}
-                  >
-                    {tryOnLoading
-                      ? "Applying..."
-                      : tryOnResults[currentComboIndex]
-                        ? "Try-on applied"
-                        : "Try On This Look"}
-                  </button>
-
-                  {/* Regenerate */}
-                  <div className="flex justify-center mt-2 pt-2 border-t border-white/10">
+                  <div>
+                    {/* Try-on button */}
                     <button
-                      onClick={handleGenerate}
-                      className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
+                      onClick={handleTryOn}
+                      disabled={tryOnLoading}
+                      className={`w-full py-1.5 rounded-lg text-[11px] font-medium transition-all ${tryOnLoading
+                          ? "bg-white/5 text-white/30 border border-white/10 cursor-not-allowed"
+                          : tryOnResults[currentComboIndex]
+                            ? "bg-white/10 text-white/70 border border-white/20 hover:bg-white/20"
+                            : "bg-white text-background hover:bg-white/90"
+                        }`}
                     >
-                      Regenerate
+                      {tryOnLoading
+                        ? "Applying..."
+                        : tryOnResults[currentComboIndex]
+                          ? "Try-on applied"
+                          : "Try On This Look"}
                     </button>
+
+                    {/* Regenerate */}
+                    <div className="flex justify-center mt-2 pt-2 border-t border-white/10">
+                      <button
+                        onClick={handleGenerate}
+                        className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
+                      >
+                        Regenerate
+                      </button>
+                    </div>
                   </div>
                 </div>
+
+                {/* Model picker overlay */}
+                {showModelPicker && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 z-30 bg-[#0a0a0a]/95 backdrop-blur-2xl flex flex-col p-4"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm font-serif font-bold text-white">Choose a Model</span>
+                      <button
+                        onClick={() => setShowModelPicker(false)}
+                        className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-colors"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                          <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="flex gap-3 flex-wrap justify-center overflow-y-auto pb-4">
+                      {models.map((model) => {
+                        const isActive = selectedModelId === model.id;
+                        const imgUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+                          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/model-photos/${model.storage_path}`
+                          : "";
+                        return (
+                          <button
+                            key={model.id}
+                            onClick={() => {
+                              setSelectedModelId(model.id);
+                              setShowModelPicker(false);
+                            }}
+                            className={`w-24 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${isActive
+                                ? "border-white ring-2 ring-white/20"
+                                : "border-transparent hover:border-white/30"
+                              }`}
+                          >
+                            <div className="relative aspect-[3/4]">
+                              <img src={imgUrl} alt={model.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="py-1.5 text-[10px] text-white font-medium text-center bg-white/10 truncate">
+                              {model.name}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -865,14 +934,35 @@ const handleGenerate = useCallback(async()=>{
                 alt="Try-on result"
                 className="w-full h-full object-contain rounded-xl"
               />
-              <button
-                onClick={closeFullscreen}
-                className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/70 hover:text-white transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </button>
+              <div className="absolute -top-3 -right-3 flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    const resp = await fetch(fullscreenImage)
+                    const blob = await resp.blob()
+                    const fd = new FormData()
+                    fd.append("savedImage", blob, "tryon.png")
+                    fd.append("outfit_ids", JSON.stringify(selectedIds))
+                    saveFavMutation.mutate(fd, {
+                      onSuccess: () => toast.success("Saved to favorites"),
+                      onError: () => toast.error("Failed to save"),
+                    })
+                  }}
+                  disabled={saveFavMutation.isPending}
+                  className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/70 hover:text-red-400 hover:border-red-400/50 transition-colors disabled:opacity-50"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill={saveFavMutation.isSuccess ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={closeFullscreen}
+                  className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

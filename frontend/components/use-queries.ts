@@ -22,7 +22,7 @@ export function useModel() {
 
 export function useFavorites(page = 1, limit = 10) {
     return useQuery({
-        queryKey: ["favorites"],
+        queryKey: ["favorites", page, limit],
         queryFn: () => getFavorites(page, limit),
         staleTime: 10_00
     })
@@ -63,11 +63,11 @@ export function useTryOn() {
 }
 
 
-export function useSaveFavorites() {
+export function useSaveFavorites(page = 1, limit = 10) {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (formData: FormData) => saveFavorite(formData),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites"] })
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites", page, limit] })
     })
 
 }

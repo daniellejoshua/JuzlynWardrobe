@@ -31,14 +31,14 @@ async def saveToFavorites(
         raise HTTPException(400, f"Error on parsing outfits_ids {e.msg}")
 
     try:
-        public_url, _ = upload_tryon_result(
+        public_url, storage_path = upload_tryon_result(
             file_bytes, savedImage.filename or "upload.png", savedImage.content_type
         )
     except Exception as e:
         raise HTTPException(400, f"Error on uploading to the bucket {e}")
     try:
         result = save_to_favorites(
-            user_id, public_url, ids, combo_name, combo_description
+            user_id, public_url, storage_path, ids, combo_name, combo_description
         )
     except Exception as e:
         raise HTTPException(400, f"Error on Inserting to the table {e}")

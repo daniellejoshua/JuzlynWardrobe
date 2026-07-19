@@ -37,7 +37,6 @@ interface FilterBarProps {
   selectedOccasion: string;
   selectedClothingType: string;
   selectedColor: string;
-  outfitCount: number;
   onSearchChange: (value: string) => void;
   onOccasionChange: (value: string) => void;
   onClothingTypeChange: (value: string) => void;
@@ -323,7 +322,6 @@ export const FilterBar = memo(function FilterBar({
   selectedOccasion,
   selectedClothingType,
   selectedColor,
-  outfitCount,
   onSearchChange,
   onOccasionChange,
   onClothingTypeChange,
@@ -359,9 +357,6 @@ export const FilterBar = memo(function FilterBar({
             className="w-full pl-8 pr-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-xs placeholder-white/30 focus:outline-none focus:border-accent/50 transition-all"
           />
         </div>
-        <span className="text-xs text-white/40 whitespace-nowrap tabular-nums">
-          {outfitCount}
-        </span>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
