@@ -13,6 +13,7 @@ interface OutfitCardProps {
   compact?: boolean;
   showRemoveButton?: boolean;
   onRemove?: () => void;
+  showOccasion?: boolean;
 }
 
 export const OutfitCard = memo(function OutfitCard({
@@ -23,6 +24,7 @@ export const OutfitCard = memo(function OutfitCard({
   compact = false,
   showRemoveButton = false,
   onRemove,
+  showOccasion = true,
 }: OutfitCardProps) {
   const colors = outfit.primary_color
     ? outfit.primary_color.split(",").map((c) => c.trim())
@@ -36,9 +38,7 @@ export const OutfitCard = memo(function OutfitCard({
       viewport={{ once: true }}
       onClick={onClick}
       className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${
-        isSelected
-          ? "ring-2 ring-white scale-[1.02]"
-          : "hover:scale-[1.02]"
+        isSelected ? "ring-2 ring-white scale-[1.02]" : "hover:scale-[1.02]"
       }`}
     >
       {/* Selected badge - checkmark */}
@@ -69,39 +69,39 @@ export const OutfitCard = memo(function OutfitCard({
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
 
       {/* Image */}
-      <div className={`relative w-full overflow-hidden ${compact ? "h-36" : "h-56"}`}>
+      <div className={`relative w-full overflow-hidden bg-zinc-900/60 ${compact ? "h-36" : "h-56"}`}>
         <Image
           src={outfit.image_url}
           alt={outfit.clothing_type}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          className="object-contain group-hover:scale-105 transition-transform duration-300"
         />
       </div>
 
       {/* Card content */}
       <div className={`absolute inset-0 flex flex-col justify-between z-20 ${compact ? "p-3" : "p-4"}`}>
         {/* Top tags */}
-        {outfit.occasion && (
-          <div className="flex gap-1.5 flex-wrap">
-            <span className={`rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 ${compact ? "text-[10px] px-2 py-0.5" : "text-xs px-3 py-1"}`}>
+        {showOccasion && outfit.occasion && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-px bg-white/30" />
+            <span className="text-[10px] text-white/50 font-medium tracking-wider uppercase leading-none">
               {outfit.occasion}
             </span>
           </div>
         )}
 
-        {/* Bottom info */}
-        <div className={compact ? "space-y-1" : "space-y-2"}>
-          <h3 className={`font-serif font-bold text-white leading-tight group-hover:text-accent transition-colors ${compact ? "text-sm" : "text-lg"}`}>
+        {/* Bottom overlay bar */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-8 px-4 pb-4">
+          <h3 className={`font-serif font-bold text-white leading-tight ${compact ? "text-sm" : "text-lg"}`}>
             {outfit.name}
           </h3>
           {!compact && (
-            <p className="text-xs text-white/60 line-clamp-2">
+            <p className="text-xs text-white/60 line-clamp-2 mt-1">
               {outfit.category}
             </p>
           )}
-          {/* Color palette */}
           {colors.length > 0 && (
-            <div className="flex gap-1.5 pt-1">
+            <div className="flex gap-1.5 pt-2">
               {colors.map((color, idx) => (
                 <div
                   key={idx}
@@ -115,7 +115,6 @@ export const OutfitCard = memo(function OutfitCard({
         </div>
       </div>
 
-      {/* Hover effect - glassmorphic border */}
       <div className="absolute inset-0 rounded-2xl border border-white/10 group-hover:border-white/30 transition-all duration-300 z-[5]" />
     </motion.div>
   );

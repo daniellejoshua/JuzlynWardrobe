@@ -7,6 +7,7 @@ import { getOutfits } from "@/lib/api";
 import { OutfitGrid } from "@/components/outfit-grid";
 import { FilterBar } from "@/components/filter-bar";
 import { NavBar } from "@/components/nav-bar";
+import { UploadDialog } from "@/components/upload-dialog";
 
 const PAGE_SIZE = 10;
 
@@ -19,6 +20,7 @@ export default function OutfitsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showUpload, setShowUpload] = useState(false);
 
   useEffect(() => {
     getOutfits()
@@ -151,19 +153,31 @@ export default function OutfitsPage() {
           </p>
         </motion.div>
 
-        <div className="mb-6">
-          <FilterBar
-            searchQuery={searchQuery}
-            selectedOccasion={selectedOccasion}
-            selectedClothingType={selectedClothingType}
-            selectedColor={selectedColor}
-            outfitCount={filteredOutfits.length}
-            onSearchChange={handleSearchChange}
-            onOccasionChange={handleOccasionChange}
-            onClothingTypeChange={handleClothingTypeChange}
-            onColorChange={handleColorChange}
-          />
+        <div className="flex items-start gap-3 mb-6">
+          <div className="flex-1 min-w-0">
+            <FilterBar
+              searchQuery={searchQuery}
+              selectedOccasion={selectedOccasion}
+              selectedClothingType={selectedClothingType}
+              selectedColor={selectedColor}
+              onSearchChange={handleSearchChange}
+              onOccasionChange={handleOccasionChange}
+              onClothingTypeChange={handleClothingTypeChange}
+              onColorChange={handleColorChange}
+            />
+          </div>
+          <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            onClick={() => setShowUpload(true)}
+            className="px-5 py-2.5 bg-white hover:bg-white/90 text-background font-medium rounded-lg text-sm transition-all shrink-0 mt-3"
+          >
+            + Add Outfit
+          </motion.button>
         </div>
+
+        <UploadDialog open={showUpload} onClose={() => setShowUpload(false)} />
 
         {/* Outfit grid */}
         <motion.div
