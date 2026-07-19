@@ -124,3 +124,18 @@ def get_favorites_by_user_id(user_id, offset=0, limit=10):
         return (data, len(data) == limit)
     except Exception as e:
         raise Exception(str(e))
+
+
+def delete_favorites(user_id: str, favorite_id: str) -> str:
+    response = (
+        supabase.table("favorites")
+        .select("*")
+        .eq("id", favorite_id)
+        .eq("user_id", user_id)
+        .execute()
+    )
+    if not response.data:
+        raise Exception("Favorites does not belogn to the user")
+    storage_path: str = response.data[0]["storage_path"]  # type: ignore
+    supabase.table("favorites").delete().eq("id", favorite_id).execute()
+    return storage_path
