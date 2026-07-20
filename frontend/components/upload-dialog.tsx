@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUploadOutfits } from "@/components/use-queries";
+import { toast } from "sonner";
 
 const clothingTypes = [
   "Top", "Bottom", "Dress", "Jacket", "Shoes", "Accessory", "Outerwear",
@@ -169,8 +170,12 @@ export function UploadDialog({ open, onClose }: UploadDialogProps) {
 
     uploadMutation.mutate(fd, {
       onSuccess: () => {
+        toast.success("Outfit uploaded");
         reset();
         onClose();
+      },
+      onError: () => {
+        toast.error("Failed to upload outfit");
       },
     });
   };

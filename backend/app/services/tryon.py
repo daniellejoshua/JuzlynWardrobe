@@ -19,7 +19,7 @@ CLOTHING_TYPE_TO_PIPELINE_CATEGORY = {
 class TryOnService(ABC):
     @abstractmethod
     def try_on_garment(
-        self, person_bytes: bytes, garment_bytes: bytes, category: str
+        self, person_bytes: bytes, garment_bytes: bytes, category: str, *, segmentation_free: bool = True
     ) -> bytes:
         """Single garment try-on. Returns PNG bytes."""
         ...
@@ -40,9 +40,13 @@ class TryOnService(ABC):
             )
         )
         current = person_bytes
+        is_combo = len(vton_items) > 1
         for item in vton_items:
             garment_bytes = download_image(item["image_url"])
-            current = self.try_on_garment(current, garment_bytes, item["category"])
+            current = self.try_on_garment(
+                current, garment_bytes, item["category"],
+                segmentation_free=not is_combo,
+            )
         return current
 
 
@@ -61,7 +65,7 @@ class LocalFashnVtonService(TryOnService):
             self._pipeline = TryOnPipeline(weights_dir=WEIGHTS_DIR, device="cpu")
         return self._pipeline
 
-    def try_on_garment(self, person_bytes, garment_bytes, category):
+    def try_on_garment(self, person_bytes, garment_bytes, category, *, segmentation_free=True):
         pipeline = self.load_pipeline()
         person = Image.open(BytesIO(person_bytes)).convert("RGB")
         garment = Image.open(BytesIO(garment_bytes)).convert("RGB")
@@ -71,6 +75,7 @@ class LocalFashnVtonService(TryOnService):
             category=CLOTHING_TYPE_TO_PIPELINE_CATEGORY.get(category, "tops"),  # type:ignore
             num_samples=1,
             num_timesteps=30,
+            segmentation_free=segmentation_free,
         )
 
         buf = BytesIO()

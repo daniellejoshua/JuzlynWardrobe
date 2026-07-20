@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Outfit } from "@/data/demo-outfits";
-import { getOutfits } from "@/lib/api";
+import type { Outfit } from "@/data/demo-outfits";
 import { OutfitGrid } from "@/components/outfit-grid";
 import { FilterBar } from "@/components/filter-bar";
 import { NavBar } from "@/components/nav-bar";
 import { UploadDialog } from "@/components/upload-dialog";
+import { useOutfits } from "@/components/use-queries";
 
 const PAGE_SIZE = 10;
 
@@ -16,18 +16,10 @@ export default function OutfitsPage() {
   const [selectedOccasion, setSelectedOccasion] = useState("All");
   const [selectedClothingType, setSelectedClothingType] = useState("All");
   const [selectedColor, setSelectedColor] = useState("");
-  const [allOutfits, setAllOutfits] = useState<Outfit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showUpload, setShowUpload] = useState(false);
-
-  useEffect(() => {
-    getOutfits()
-      .then((data) => setAllOutfits(data.outfits))
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data, isLoading, error } = useOutfits();
+  const allOutfits: Outfit[] = data?.outfits ?? [];
 
   const goToFirstPage = useCallback(() => setCurrentPage(1), []);
 
@@ -185,7 +177,7 @@ export default function OutfitsPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          {loading ? (
+          {isLoading ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -199,7 +191,7 @@ export default function OutfitsPage() {
               animate={{ opacity: 1 }}
               className="text-center py-16"
             >
-              <p className="text-red-400">{error}</p>
+              <p className="text-red-400">Failed to load outfits</p>
             </motion.div>
           ) : paginatedOutfits.length > 0 ? (
             <>

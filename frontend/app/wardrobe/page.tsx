@@ -6,9 +6,9 @@ import Image from "next/image";
 import { OutfitCard } from "@/components/outfit-card";
 import { NavBar } from "@/components/nav-bar";
 import { FilterBar } from "@/components/filter-bar";
-import { Outfit } from "@/data/demo-outfits";
-import { getOutfits, generateCombinations, getModels, tryOnCombo } from "@/lib/api";
-import { useSaveFavorites } from "@/components/use-queries";
+import type { Outfit } from "@/data/demo-outfits";
+import { generateCombinations, tryOnCombo } from "@/lib/api";
+import { useSaveFavorites, useOutfits, useModel } from "@/components/use-queries";
 import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
@@ -117,17 +117,17 @@ function simulateCombinations(
 }
 
 export default function WardrobePage() {
-  const [allOutfits, setAllOutfits] = useState<Outfit[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: outfitsData, isLoading: loading } = useOutfits();
+  const allOutfits: Outfit[] = outfitsData?.outfits ?? [];
+  const { data: modelsData, isLoading: modelsLoading } = useModel();
+  const models: Model[] = modelsData?.models ?? modelsData ?? [];
   const [genLoading, setGenLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [combinations, setCombinations] = useState<GeneratedCombo[] | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [currentComboIndex, setCurrentComboIndex] = useState(0);
 
-  const [models, setModels] = useState<Model[]>([]);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
-  const [modelsLoading, setModelsLoading] = useState(false);
   const [tryOnLoading, setTryOnLoading] = useState(false);
   const [tryOnResults, setTryOnResults] = useState<Record<number, string>>({});
   const [directTryOnLoading, setDirectTryOnLoading] = useState(false);
@@ -142,17 +142,6 @@ export default function WardrobePage() {
   const [selectedClothingType, setSelectedClothingType] = useState("All");
   const [selectedColor, setSelectedColor] = useState("");
 
-
-  useEffect(() => {
-    getOutfits()
-      .then((data) => setAllOutfits(data.outfits))
-      .catch(() => { })
-      .finally(() => setLoading(false));
-    getModels()
-      .then((data) => setModels(data.models || data))
-      .catch(() => { })
-      .finally(() => setModelsLoading(false));
-  }, []);
 
   useEffect(() => {
     setIsSaved(false);
@@ -350,10 +339,7 @@ export default function WardrobePage() {
   }, [pageCount]);
 
   const closeFullscreen = useCallback(() => {
-    setFullscreenImage((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
+    setFullscreenImage(null);
   }, []);
 
   useEffect(() => {
@@ -372,12 +358,6 @@ export default function WardrobePage() {
       document.body.style.overflow = "";
     };
   }, [showResults, closeResults, fullscreenImage, closeFullscreen]);
-
-  useEffect(() => {
-    return () => {
-      Object.values(tryOnResults).forEach(URL.revokeObjectURL);
-    };
-  }, [tryOnResults]);
 
   const selectionCount = selectedIds.length;
   const anyLoading = genLoading || directTryOnLoading;
@@ -750,11 +730,11 @@ export default function WardrobePage() {
                       </svg>
                     </div>
                   )}
-                  <Image
+                  <img
+                    key={tryOnResults[currentComboIndex] || "model"}
                     src={tryOnResults[currentComboIndex] || selectedModelUrl}
                     alt={currentCombo.name}
-                    fill
-                    className={tryOnResults[currentComboIndex] ? "object-contain" : "object-cover"}
+                    className={`w-full h-full ${tryOnResults[currentComboIndex] ? "object-contain" : "object-cover"}`}
                   />
 
                   {/* Change model overlay on hover (only when showing model photo) */}
@@ -878,6 +858,35 @@ export default function WardrobePage() {
                           : "Try On This Look"}
                     </button>
 
+                    {/* Save to favorites */}
+                    {tryOnResults[currentComboIndex] && (
+                      <button
+                        onClick={async () => {
+                          const resp = await fetch(tryOnResults[currentComboIndex])
+                          const blob = await resp.blob()
+                          const fd = new FormData()
+                          fd.append("savedImage", blob, "tryon.png")
+                          fd.append("outfit_ids", JSON.stringify(selectedIds))
+                          saveFavMutation.mutate(fd, {
+                            onSuccess: () => toast.success("Saved to favorites"),
+                            onError: () => toast.error("Failed to save"),
+                          })
+                        }}
+                        disabled={saveFavMutation.isPending || isSaved}
+                        className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium bg-white/10 text-white/70 border border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          className={`w-3.5 h-3.5 ${isSaved ? "fill-red-500 text-red-500" : "fill-none"}`}
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                        {isSaved ? "Saved" : "Save to Favorites"}
+                      </button>
+                    )}
+
                     {/* Regenerate */}
                     <div className="flex justify-center pt-1">
                       <button
@@ -997,6 +1006,7 @@ export default function WardrobePage() {
                 {/* Try-on result image */}
                 <div className="md:w-1/2 relative h-48 md:h-96 bg-zinc-900/60">
                   <img
+                    key={fullscreenImage}
                     src={fullscreenImage}
                     alt="Try-on result"
                     className="w-full h-full object-contain"
