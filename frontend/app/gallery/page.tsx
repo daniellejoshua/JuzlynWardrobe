@@ -1,17 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { NavBar } from "@/components/nav-bar";
-import { FavoriteCard } from "@/components/favorite-card";
-import { useFavorites } from "@/components/use-queries";
+import { FavoriteCard, type Favorite } from "@/components/favorite-card";
+import { useFavorites, useDeleteFavorite } from "@/components/use-queries";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import { toast } from "sonner";
+
 export default function FavoritesPage() {
   const [page, setPage] = useState(1)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const { data, isLoading } = useFavorites(page)
-  const favorites = data?.favorites ?? []
+  const deleteMutation = useDeleteFavorite(page)
+  const favorites: Favorite[] = data?.favorites ?? []
   const hasMore = data?.has_more ?? false
+
+  useEffect(() => {
+    if (showDeleteDialog) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [showDeleteDialog]);
+
+  const toggleFavorite = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const handleDelete = async () => {
+    const ids = Array.from(selectedIds)
+    try {
+      await Promise.all(ids.map(id => deleteMutation.mutateAsync(id)))
+      setSelectedIds(new Set())
+      setShowDeleteDialog(false)
+      toast.success(`${ids.length} favorite${ids.length !== 1 ? "s" : ""} deleted`)
+    } catch {
+      toast.error("Failed to delete favorites")
+    }
+  }
 
   return (
     <main className="relative min-h-screen bg-background text-foreground overflow-y-auto">
@@ -53,6 +85,36 @@ export default function FavoritesPage() {
           </p>
         </motion.div>
 
+        {/* Delete selected toast (fixed bottom center) */}
+        <AnimatePresence>
+          {selectedIds.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-between gap-4 px-5 py-3 rounded-2xl bg-zinc-900/90 backdrop-blur-lg border border-white/10 shadow-2xl"
+            >
+              <span className="text-sm text-white/70 whitespace-nowrap">
+                {selectedIds.size} selected
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedIds(new Set())}
+                  className="text-xs text-white/50 hover:text-white/80 transition-colors px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-xs text-white px-3 py-1.5 rounded-lg bg-red-500 hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Loading state */}
         {isLoading ? (
           <div className="py-20">
@@ -84,7 +146,13 @@ export default function FavoritesPage() {
             {/* Favorites Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {favorites.map((fav, index) => (
-                <FavoriteCard key={fav.id} favorite={fav} index={index} />
+                <FavoriteCard
+                  key={fav.id}
+                  favorite={fav}
+                  index={index}
+                  isSelected={selectedIds.has(fav.id)}
+                  onToggle={toggleFavorite}
+                />
               ))}
             </div>
             {(hasMore || page > 1) && (
@@ -109,6 +177,63 @@ export default function FavoritesPage() {
           </motion.div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AnimatePresence>
+        {showDeleteDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteDialog(false)} />
+
+            {/* Dialog */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl"
+            >
+              <div className="flex flex-col items-center text-center gap-4">
+                {/* Trash icon */}
+                <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-serif font-bold text-white mb-1">
+                    Delete Favorites
+                  </h3>
+                  <p className="text-sm text-white/60">
+                    Are you sure you want to delete {selectedIds.size} favorite{selectedIds.size !== 1 ? "s" : ""}? This action cannot be undone.
+                  </p>
+                </div>
+
+                <div className="flex gap-3 w-full mt-2">
+                  <button
+                    onClick={() => setShowDeleteDialog(false)}
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm text-white/70 bg-white/5 hover:bg-white/10 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleteMutation.isPending}
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
+                  >
+                    {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/10 px-8 md:px-16 py-8 md:py-10 text-white/40 text-xs mt-10">

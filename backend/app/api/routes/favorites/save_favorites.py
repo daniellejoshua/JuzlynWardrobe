@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def saveToFavorites(
     user_id: str = Depends(get_current_user),
     savedImage: UploadFile = File(...),

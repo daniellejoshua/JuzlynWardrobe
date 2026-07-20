@@ -87,9 +87,28 @@ def get_models_by_user_id(user_id):
         raise Exception(str(e))
 
 
+def check_duplicate_favorite(user_id, outfit_ids):
+    try:
+        response = (
+            supabase.table("favorites")
+            .select("*")
+            .eq("user_id", user_id)
+            .eq("outfit_ids", outfit_ids)
+            .limit(1)
+            .execute()
+        )
+        return response.data[0] if response.data else None
+    except Exception:
+        return None
+
+
 def save_to_favorites(
     user_id, image_url, storage_path, outfit_ids, combo_name, combo_description
 ):
+    existing = check_duplicate_favorite(user_id, outfit_ids)
+    if existing:
+        return [existing]
+
     data = {
         "user_id": user_id,
         "storage_path": storage_path,

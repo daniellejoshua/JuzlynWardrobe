@@ -1,4 +1,4 @@
-import { generateCombinations, getFavorites, getModels, getOutfits, saveFavorite, tryOnCombo, uploadModel, uploadOutfit, } from "@/lib/api";
+import { deleteFavorites, generateCombinations, getFavorites, getModels, getOutfits, saveFavorite, tryOnCombo, uploadModel, uploadOutfit, } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 
@@ -68,6 +68,16 @@ export function useSaveFavorites(page = 1, limit = 10) {
     return useMutation({
         mutationFn: (formData: FormData) => saveFavorite(formData),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["favorites", page, limit] })
+    })
+
+}
+export function useDeleteFavorite(page = 1, limit = 10) {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (favoriteID: string) => deleteFavorites(favoriteID),
+        onSuccess: () => queryClient.invalidateQueries({
+            queryKey: ["favorites", page, limit]
+        })
     })
 
 }

@@ -133,6 +133,7 @@ export default function WardrobePage() {
   const [directTryOnLoading, setDirectTryOnLoading] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [showModelPicker, setShowModelPicker] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const saveFavMutation = useSaveFavorites();
 
@@ -152,6 +153,10 @@ export default function WardrobePage() {
       .catch(() => { })
       .finally(() => setModelsLoading(false));
   }, []);
+
+  useEffect(() => {
+    setIsSaved(false);
+  }, [fullscreenImage]);
 
 
 
@@ -783,23 +788,83 @@ export default function WardrobePage() {
                 {/* Items + controls */}
                 <div className="md:w-1/2 p-3 flex flex-col justify-between md:h-96">
                   <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent">
-                    {/* Items grid */}
+                    {/* Try-on applied badge */}
+                    {tryOnResults[currentComboIndex] && (
+                      <div className="flex items-center gap-1.5 mb-3 px-2 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                        <svg className="w-3 h-3 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span className="text-[10px] text-emerald-400 font-medium">Try-on applied</span>
+                      </div>
+                    )}
+
+                    {/* Items list */}
                     <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider mb-2 block">
-                      Items
+                      Look Details
                     </span>
-                    <div className="grid grid-cols-2 gap-1.5 mb-3">
+                    <div className="space-y-2 mb-3">
                       {currentCombo.items.map((item) => (
-                        <OutfitCard key={item.id} outfit={item} compact index={0} showOccasion={false} />
+                        <div
+                          key={item.id}
+                          className="flex items-center gap-2.5 p-2 rounded-lg bg-white/5 border border-white/5"
+                        >
+                          <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-zinc-800">
+                            <img
+                              src={item.image_url}
+                              alt={item.clothing_type}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[11px] text-white font-medium truncate">
+                              {item.name || item.clothing_type}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[9px] text-white/40 uppercase tracking-wider">
+                                {item.clothing_type}
+                              </span>
+                              {item.primary_color && (
+                                <>
+                                  <span className="text-[8px] text-white/20">·</span>
+                                  <span className="text-[9px] text-white/40">{item.primary_color}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       ))}
                     </div>
+
+                    {/* Style tags */}
+                    {currentCombo.items.some((i) => i.style_tags && i.style_tags.length > 0) && (
+                      <div className="mb-3">
+                        <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider mb-1.5 block">
+                          Style Tags
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {Array.from(
+                            new Set(
+                              currentCombo.items.flatMap((i) => i.style_tags || [])
+                            )
+                          ).map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] text-white/50"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div>
+                  <div className="pt-2 space-y-2">
                     {/* Try-on button */}
                     <button
                       onClick={handleTryOn}
                       disabled={tryOnLoading}
-                      className={`w-full py-1.5 rounded-lg text-[11px] font-medium transition-all ${tryOnLoading
+                      className={`w-full py-2 rounded-lg text-[11px] font-medium transition-all ${tryOnLoading
                           ? "bg-white/5 text-white/30 border border-white/10 cursor-not-allowed"
                           : tryOnResults[currentComboIndex]
                             ? "bg-white/10 text-white/70 border border-white/20 hover:bg-white/20"
@@ -814,7 +879,7 @@ export default function WardrobePage() {
                     </button>
 
                     {/* Regenerate */}
-                    <div className="flex justify-center mt-2 pt-2 border-t border-white/10">
+                    <div className="flex justify-center pt-1">
                       <button
                         onClick={handleGenerate}
                         className="text-[10px] text-white/30 hover:text-white/60 transition-colors"
@@ -926,42 +991,105 @@ export default function WardrobePage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="relative w-full max-w-4xl"
-              style={{ height: "85vh" }}
+              className="relative w-full max-w-4xl max-h-[90vh] rounded-xl border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-2xl overflow-hidden shadow-2xl"
             >
-              <img
-                src={fullscreenImage}
-                alt="Try-on result"
-                className="w-full h-full object-contain rounded-xl"
-              />
-              <div className="absolute -top-3 -right-3 flex items-center gap-2">
-                <button
-                  onClick={async () => {
-                    const resp = await fetch(fullscreenImage)
-                    const blob = await resp.blob()
-                    const fd = new FormData()
-                    fd.append("savedImage", blob, "tryon.png")
-                    fd.append("outfit_ids", JSON.stringify(selectedIds))
-                    saveFavMutation.mutate(fd, {
-                      onSuccess: () => toast.success("Saved to favorites"),
-                      onError: () => toast.error("Failed to save"),
-                    })
-                  }}
-                  disabled={saveFavMutation.isPending}
-                  className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/70 hover:text-red-400 hover:border-red-400/50 transition-colors disabled:opacity-50"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill={saveFavMutation.isSuccess ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={closeFullscreen}
-                  className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/70 hover:text-white transition-colors"
-                >
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                    <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
+              <div className="flex flex-col md:flex-row">
+                {/* Try-on result image */}
+                <div className="md:w-1/2 relative h-48 md:h-96 bg-zinc-900/60">
+                  <img
+                    src={fullscreenImage}
+                    alt="Try-on result"
+                    className="w-full h-full object-contain"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                </div>
+
+                {/* Outfits used */}
+                <div className="md:w-1/2 p-3 flex flex-col justify-between md:h-96">
+                  <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider">
+                        Outfits Used
+                      </span>
+                      <span className="text-[10px] text-white/30">{selectedIds.length} pieces</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {selectedIds.map((id) => {
+                        const item = allOutfits.find((o) => o.id === id)
+                        if (!item) return null
+                        return (
+                          <div
+                            key={id}
+                            className="flex items-center gap-2.5 p-2 rounded-lg bg-white/5 border border-white/5"
+                          >
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-zinc-800">
+                              <img
+                                src={item.image_url}
+                                alt={item.clothing_type}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[11px] text-white font-medium truncate">
+                                {item.name || item.clothing_type}
+                              </p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[9px] text-white/40 uppercase tracking-wider">
+                                  {item.clothing_type}
+                                </span>
+                                {item.primary_color && (
+                                  <>
+                                    <span className="text-[8px] text-white/20">·</span>
+                                    <span className="text-[9px] text-white/40">{item.primary_color}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                    <button
+                      onClick={async () => {
+                        const resp = await fetch(fullscreenImage)
+                        const blob = await resp.blob()
+                        const fd = new FormData()
+                        fd.append("savedImage", blob, "tryon.png")
+                        fd.append("outfit_ids", JSON.stringify(selectedIds))
+                        saveFavMutation.mutate(fd, {
+                          onSuccess: () => {
+                            setIsSaved(true)
+                            toast.success("Saved to favorites")
+                          },
+                          onError: () => toast.error("Failed to save"),
+                        })
+                      }}
+                      disabled={saveFavMutation.isPending || isSaved}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-medium bg-white/10 text-white/70 border border-white/20 hover:bg-white/20 transition-colors disabled:opacity-50"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        className={`w-3.5 h-3.5 ${isSaved ? "fill-red-500 text-red-500" : "fill-none"}`}
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                      {saveFavMutation.isPending ? "Saving..." : isSaved ? "Saved" : "Save to Favorites"}
+                    </button>
+                    <button
+                      onClick={closeFullscreen}
+                      className="px-3 py-1.5 rounded-lg text-[11px] text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </motion.div>

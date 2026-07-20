@@ -90,3 +90,9 @@ export async function saveFavorite(formData: FormData) {
   if (!res.ok) throw new Error("Failed to save favorite");
   return res.json();
 }
+
+export async function deleteFavorites(favoriteID: string) {
+  const res = await authFetch(`/favorites/${favoriteID}`, { method: "DELETE" })
+  if (!res.ok) throw new Error("Failed to delete Favorites");
+  return res.json()
+}
