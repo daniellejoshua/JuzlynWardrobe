@@ -1,14 +1,16 @@
 from dotenv import load_dotenv
 
+
 load_dotenv("../.env")
 
-
-from app.api.routes import generate, outfit_upload, outfits, tryon  # noqa: E402
+from app.api.routes import generate, tryon  # noqa: E402
 from app.api.routes.models import getModels, model_upload  # noqa: E402
 from app.api.routes.favorites import get_favorites, save_favorites, delete_favorites  # noqa: E402
 from fastapi import FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
-
+from app.api.routes.outfits import outfits  # noqa: E402
+from app.api.routes.outfits import outfit_upload  # noqa: E402
+from app.api.routes.outfits import delete_outfits  # noqa:E402
 
 app = FastAPI(title="AI WARDROBE STYLIST API")
 
@@ -31,6 +33,7 @@ app.include_router(model_upload.router, prefix="/models/upload")
 app.include_router(save_favorites.router, prefix="/favorites/save")
 app.include_router(get_favorites.router, prefix="/favorites")
 app.include_router(delete_favorites.router, prefix="/favorites")
+app.include_router(delete_outfits.router, prefix="/outfits")
 
 
 @app.get("/")

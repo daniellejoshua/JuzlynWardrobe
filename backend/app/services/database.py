@@ -158,3 +158,18 @@ def delete_favorites(user_id: str, favorite_id: str) -> str:
     storage_path: str = response.data[0]["storage_path"]  # type: ignore
     supabase.table("favorites").delete().eq("id", favorite_id).execute()
     return storage_path
+
+
+def delete_outfits(user_id: str, outfit_ids: str):
+    response = (
+        supabase.table("outfits")
+        .select("storage_path")
+        .eq("id", outfit_ids)
+        .eq("user_id", user_id)
+        .execute()
+    )
+    if not response.data:
+        raise Exception("Outfits does not belong to the user")
+    storage_path: str = response.data[0]["storage_path"]  # type:ignore
+    supabase.table("outfits").delete().eq("id", outfit_ids).execute()
+    return storage_path
