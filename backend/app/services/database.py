@@ -149,30 +149,27 @@ def delete_favorites(user_id: str, favorite_id: list[str]) -> list[str]:
     response = (
         supabase.table("favorites")
         .select("storage_path")
-        .in_("id", [favorite_id])
+        .in_("id", favorite_id)
         .eq("user_id", user_id)
         .execute()
     )
     if not response.data:
         raise Exception("Favorites does not belogn to the user")
     storage_paths = [str(fav["storage_path"]) for fav in response.data]  # type:ignore
-    supabase.table("favorites").delete().in_("id", [favorite_id]).execute()
+    supabase.table("favorites").delete().in_("id", favorite_id).execute()
     return storage_paths
 
 
-def delete_outfits(user_id: str, outfit_ids: str):
+def delete_outfits(user_id: str, outfit_ids: list[str]) -> list[str]:
     response = (
         supabase.table("outfits")
         .select("storage_path")
-        .eq("id", outfit_ids)
+        .in_("id", outfit_ids)
         .eq("user_id", user_id)
         .execute()
     )
     if not response.data:
         raise Exception("Outfits does not belong to the user")
-    storage_path: str = response.data[0]["storage_path"]  # type:ignore
-    supabase.table("outfits").delete().eq("id", outfit_ids).execute()
-    return storage_path
-
-
-# TODO: change eq() to in() for at once deletiion
+    storage_paths = [str(outfits["storage_path"]) for outfits in response.data]  # type: ignore
+    supabase.table("outfits").delete().in_("id", outfit_ids).execute()
+    return storage_paths
