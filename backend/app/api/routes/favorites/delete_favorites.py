@@ -9,8 +9,8 @@ router = APIRouter()
 @router.delete("/{favorite_id}")
 async def deleteFavorites(favorite_id: str, user_id: str = Depends(get_current_user)):
     try:
-        storage_path = delete_favorites(user_id, favorite_id)
-        supabase.storage.from_("tryon-result").remove([storage_path])
+        storage_paths = delete_favorites(user_id, [favorite_id])
+        supabase.storage.from_("tryon-result").remove(storage_paths)
         return {"message": "Favorite Deleted Successfully"}
     except Exception as e:
         raise HTTPException(400, detail=str(e))
