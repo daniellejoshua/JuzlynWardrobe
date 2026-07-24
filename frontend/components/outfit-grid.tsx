@@ -10,6 +10,8 @@ interface OutfitGridProps {
   onSelectOutfit?: (outfit: Outfit) => void;
   maxItems?: number;
   columns?: 3 | 5;
+  selectedIds?: Set<string>;
+  onToggle?: (id: string) => void;
 }
 
 export const OutfitGrid = memo(function OutfitGrid({
@@ -18,6 +20,8 @@ export const OutfitGrid = memo(function OutfitGrid({
   onSelectOutfit,
   maxItems = 10,
   columns = 5,
+  selectedIds,
+  onToggle,
 }: OutfitGridProps) {
   const displayedOutfits = outfits.slice(0, maxItems);
 
@@ -33,8 +37,8 @@ export const OutfitGrid = memo(function OutfitGrid({
           <OutfitCard
             key={outfit.id}
             outfit={outfit}
-            isSelected={selectedId === outfit.id}
-            onClick={() => onSelectOutfit?.(outfit)}
+            isSelected={selectedIds ? selectedIds.has(outfit.id) : selectedId === outfit.id}
+            onClick={() => onToggle ? onToggle(outfit.id) : onSelectOutfit?.(outfit)}
             index={index}
           />
         ))}

@@ -7,8 +7,10 @@ import { OutfitGrid } from "@/components/outfit-grid";
 import { FilterBar } from "@/components/filter-bar";
 import { NavBar } from "@/components/nav-bar";
 import { UploadDialog } from "@/components/upload-dialog";
-import { useOutfits } from "@/components/use-queries";
-
+import { useOutfits, useDeleteOutfits } from "@/components/use-queries";
+import { toast } from "sonner"
+import next from "next";
+import { arrayBuffer } from "stream/consumers";
 const PAGE_SIZE = 10;
 
 export default function OutfitsPage() {
@@ -20,6 +22,41 @@ export default function OutfitsPage() {
   const [showUpload, setShowUpload] = useState(false);
   const { data, isLoading, error } = useOutfits();
   const allOutfits: Outfit[] = data?.outfits ?? [];
+
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [showdeleteDialog, setShowDeleteDialog] = useState(false)
+  const deleteMutation = useDeleteOutfits()
+
+
+
+  const toggleOutfit = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else
+        next.add(id)
+      return next
+    })
+  }
+
+
+  const handleDelete = async () => {
+    const ids = Array.from(selectedIds)
+    try {
+      await deleteMutation.mutateAsync(ids)
+      setSelectedIds(new Set())
+      setShowDeleteDialog(false)
+      toast.success(`${ids.length} outfit ${ids.length !== 1 ? "s" : ""} deleted`)
+    } catch {
+      toast.error("Failed to Delete Outfits")
+    }
+  }
+
+
+
+
+
 
   const goToFirstPage = useCallback(() => setCurrentPage(1), []);
 
@@ -72,7 +109,7 @@ export default function OutfitsPage() {
       const matchesClothingType =
         selectedClothingType === "All" ||
         outfit.clothing_type.toLowerCase() ===
-          selectedClothingType.toLowerCase();
+        selectedClothingType.toLowerCase();
 
       const matchesColor =
         !selectedColor ||
@@ -125,6 +162,7 @@ export default function OutfitsPage() {
           `,
         }}
       />
+
       <div className="absolute inset-0 backdrop-blur-3xl" />
 
       <NavBar currentPage="outfits" />
@@ -214,11 +252,10 @@ export default function OutfitsPage() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`w-7 h-7 rounded-lg text-xs font-medium transition-all ${
-                          currentPage === page
-                            ? "bg-white text-background"
-                            : "text-white/40 hover:text-white hover:bg-white/5"
-                        }`}
+                        className={`w-7 h-7 rounded-lg text-xs font-medium transition-all ${currentPage === page
+                          ? "bg-white text-background"
+                          : "text-white/40 hover:text-white hover:bg-white/5"
+                          }`}
                       >
                         {page}
                       </button>
