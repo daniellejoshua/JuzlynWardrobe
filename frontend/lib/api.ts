@@ -1,6 +1,8 @@
 import { createClient } from "./supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+
 async function getAccessToken(): Promise<string> {
   const supabase = createClient()
   const { data } = await supabase.auth.getSession()
@@ -91,8 +93,14 @@ export async function saveFavorite(formData: FormData) {
   return res.json();
 }
 
-export async function deleteFavorites(favoriteID: string) {
-  const res = await authFetch(`/favorites/${favoriteID}`, { method: "DELETE" })
+export async function deleteFavorites(favoriteID: string[]) {
+  const res = await authFetch(`/favorites`, { method: "DELETE", headers: { "Content-type": "application/json" }, body: JSON.stringify(favoriteID) })
   if (!res.ok) throw new Error("Failed to delete Favorites");
+  return res.json()
+}
+
+export async function deleteOutfits(outfitsID: string[]) {
+  const res = await authFetch(`/outfits`, { method: "DELETE", headers: { "Content-type": "application/json" }, body: JSON.stringify(outfitsID) })
+  if (!res.ok) throw new Error("Failed to delete outfits");
   return res.json()
 }

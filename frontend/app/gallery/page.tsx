@@ -36,7 +36,7 @@ export default function FavoritesPage() {
   const handleDelete = async () => {
     const ids = Array.from(selectedIds)
     try {
-      await Promise.all(ids.map(id => deleteMutation.mutateAsync(id)))
+      await deleteMutation.mutateAsync(ids)
       setSelectedIds(new Set())
       setShowDeleteDialog(false)
       toast.success(`${ids.length} favorite${ids.length !== 1 ? "s" : ""} deleted`)
